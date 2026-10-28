@@ -1,0 +1,35 @@
+OK  multpl_pe_month 200 149582 text/html; charset=utf-8 ACAO=None
+     <!DOCTYPE html> <html lang="en"> <head> <style>  @font-face{font-family:concourse_ot_3_book;font-style:normal;font-weight:400;font-stretch:normal;font-display:swap;src:url("/static/fonts/concourse_ot_3_book.woff2") format("woff2")}@font-face{font-family:concourse_ot_3_book;font-style:italic;font-wei
+OK  multpl_eps_month 200 151435 text/html; charset=utf-8 ACAO=None
+     <!DOCTYPE html> <html lang="en"> <head> <style>  @font-face{font-family:concourse_ot_3_book;font-style:normal;font-weight:400;font-stretch:normal;font-display:swap;src:url("/static/fonts/concourse_ot_3_book.woff2") format("woff2")}@font-face{font-family:concourse_ot_3_book;font-style:italic;font-wei
+ERR spdji_eps_xlsx HTTP Error 403: Forbidden
+ERR factset_ei HTTP Error 404: Not Found
+ERR factset_ei2 HTTP Error 404: Not Found
+OK  twse_open_eps 200 405491 application/json ACAO=None
+     [ {"出表日期":"1151028","年度":"115","季別":"2","公司代號":"1101","公司名稱":"臺灣水泥股份有限公司","產業別":"水泥工業","基本每股盈餘(元)":"0.38","普通股每股面額":"新台幣                 10.0000元","營業收入":"71289957.00","營業利益":"517017
+OK  twse_bwibbu_d 200 66671 application/json;charset=UTF-8 ACAO=*
+     {"stat":"OK","date":"20261027","title":"115年10月27日 個股日本益比、殖利率及股價淨值比","fields":["證券代號","證券名稱","收盤價","殖利率(%)","股利年度","本益比","股價淨值比","財報年/季"],"data":[["1101","台泥","28.10","2.85",114,"-","0.91","115/2"],
+OK  twse_stat_list 200 752 text/html ACAO=None
+     <!DOCTYPE html> <html lang="zh-Hant-tw"> <head>  <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>404</title> <meta name="layout" content="blank"/>   <link href="/res/css/error.css?fQP1" rel="stylesheet"> </head> <body class="">    <article class="
+OK  twse_mi_index 200 1725 application/json;charset=UTF-8 ACAO=*
+     {"tables":[{},{},{},{},{},{},{"title":"115年10月27日 大盤統計資訊","fields":["成交統計","成交金額(元)","成交股數(股)","成交筆數"],"data":[["1.一般股票","946,566,532,682","4,677,443,738","3,383,305"],["2.台灣存託憑證","110,043,310","13,826,271","3,579"],["3.受益
+OK  yahoo_ndx 200 2483 application/json;charset=utf-8 ACAO=None
+     {"chart":{"result":[{"meta":{"currency":"USD","symbol":"^NDX","exchangeName":"NIM","fullExchangeName":"Nasdaq GIDS","instrumentType":"INDEX","firstTradeDate":497021400,"regularMarketTime":1793135759,"hasPrePostMarketData":false,"gmtoffset":-14400,"timezone":"EDT","exchangeTimezoneName":"America/New_
+OK  yahoo_twii 200 34916 application/json;charset=utf-8 ACAO=None
+     {"chart":{"result":[{"meta":{"currency":"TWD","symbol":"^TWII","exchangeName":"TAI","fullExchangeName":"Taiwan","instrumentType":"INDEX","firstTradeDate":867805200,"regularMarketTime":1793165595,"hasPrePostMarketData":false,"gmtoffset":28800,"timezone":"CST","exchangeTimezoneName":"Asia/Taipei","reg
+OK  siblis_indices 200 4727 application/json ACAO=*
+     {   "indices": [     {       "ticker": "ACWI",       "index_name": "Global Stock Market Index (ACWI)",       "currency": "Local",       "frequency": "daily"     },     {       "ticker": "ACWIEXUS",       "index_name": "Global Stock Market Index (ACWI) excluding the United States",       "currency": 
+OK  siblis_ndx_fwd 200 1089 application/json ACAO=*
+     {   "ticker": "NDX",   "index_name": "NASDAQ 100 Index",   "currency": "USD",   "frequency": "daily",   "ratio": "pe-forward",   "data": [     {       "trading_day (EOD)": "2023-12-29",       "value": 24.94     },     {       "trading_day (EOD)": "2024-06-28",       "value": 26.62     },     {      
+OK  siblis_ndx_tr 200 1090 application/json ACAO=*
+     {   "ticker": "NDX",   "index_name": "NASDAQ 100 Index",   "currency": "USD",   "frequency": "daily",   "ratio": "pe-trailing",   "data": [     {       "trading_day (EOD)": "2023-12-29",       "value": 30.25     },     {       "trading_day (EOD)": "2024-06-28",       "value": 31.82     },     {     
+ERR siblis_spx_fwd HTTP Error 404: Not Found
+ERR gurufocus_ndx HTTP Error 403: Forbidden
+OK  worldpe_ndx 200 344216 text/html; charset=UTF-8 ACAO=None
+     <!DOCTYPE html> <html lang="it-IT"> <head>     <meta charset="UTF-8">     <meta name="viewport" content="width=device-width, initial-scale=1">     <link rel="profile" href="https://gmpg.org/xfn/11">     <meta name='robots' content='index, follow, max-image-preview:large, max-snippet:-1, max-video-pr
+OK  wsj_pe 200 753017 text/html; charset=utf-8 ACAO=None
+        <!doctype html><!--GRAND CANYON PREBID -->   <html lang=en>     <head>       <meta charSet='utf-8' />       <meta name="description" content="P/E data based on as-reported earnings; estimate data based on operating earnings."/>     <meta name="keywords" content="Market Data Center" />     <meta n
+OK  stooq_ndx 200 796 text/html; charset=utf-8 ACAO=None
+     <!DOCTYPE html><html><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"></head><body><noscript>This site requires JavaScript to verify your browser. Please enable JavaScript and reload.</noscript><script nonce="hXbQNcvL3es9upsTYxgaQw"> (async()=>{const c="AAAAAGrh7IunkDnA9WQO
+OK  cnyes_tw_fwd 200 3816 application/json;charset=UTF-8 ACAO=None
+     {"statusCode":200,"message":"OK","data":{"items":[{"objectType":"NEWS","newsId":6639816,"title":"聯亞Q3每股賺6.12元寫單季新高 明年產能續擴增營運優於今年","summary":"聯亞第3季營收15.62億元、稅後純益6.21億元、EPS 6.12元，三率三升並創單季獲利新高。
