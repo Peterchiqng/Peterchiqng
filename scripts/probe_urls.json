@@ -1,12 +1,9 @@
 {
- "wsj": "https://www.wsj.com/market-data/stocks/peyields",
- "worldpe_ndx": "https://worldperatio.com/index/nasdaq-100/",
- "worldpe_spx": "https://worldperatio.com/index/sp-500/",
- "worldpe_tw": "https://worldperatio.com/area/taiwan/",
- "factset_list": "https://insight.factset.com/topic/earnings",
- "siblis_ndx_tr": "https://siblisresearch.com/api/v1/NDX/pe-trailing",
- "siblis_ndx_fwd": "https://siblisresearch.com/api/v1/NDX/pe-forward",
- "siblis_indices": "https://siblisresearch.com/api/v1/indices",
- "multpl_eps": "https://www.multpl.com/s-p-500-earnings/table/by-month",
- "multpl_pe": "https://www.multpl.com/s-p-500-pe-ratio/table/by-month"
+ "tw_202609.zip": "https://www.twse.com.tw/staticFiles/inspection/inspection/04/001/202609_C04001.zip",
+ "tw_201506.zip": "https://www.twse.com.tw/staticFiles/inspection/inspection/04/001/201506_C04001.zip",
+ "tw_200501.zip": "https://www.twse.com.tw/staticFiles/inspection/inspection/04/001/200501_C04001.zip",
+ "tw_199912.zip": "https://www.twse.com.tw/staticFiles/inspection/inspection/04/001/199912_C04001.zip",
+ "yahoo_twii": "https://query1.finance.yahoo.com/v8/finance/chart/%5ETWII?range=max&interval=1mo",
+ "yahoo_ndx": "https://query1.finance.yahoo.com/v8/finance/chart/%5ENDX?range=max&interval=1mo",
+ "yahoo_gspc": "https://query1.finance.yahoo.com/v8/finance/chart/%5EGSPC?range=max&interval=1mo"
 }
