@@ -402,7 +402,14 @@
   function mk(id, cfg) {
     if (typeof Chart === 'undefined') return;
     if (charts[id]) charts[id].destroy();
-    charts[id] = new Chart(document.getElementById(id), themed(cfg));
+    var c = themed(cfg);
+    (c.data && c.data.datasets || []).forEach(function (d) {
+      if ((d.type || c.type) === 'line' && typeof d.borderColor === 'string') {
+        if (d.pointBackgroundColor == null) d.pointBackgroundColor = d.borderColor;
+        if (d.pointBorderColor == null) d.pointBorderColor = d.borderColor;
+      }
+    });
+    charts[id] = new Chart(document.getElementById(id), c);
   }
   function baseOpts(extra) {
     var o = {
