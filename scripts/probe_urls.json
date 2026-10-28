@@ -1,0 +1,12 @@
+{
+ "wsj": "https://www.wsj.com/market-data/stocks/peyields",
+ "worldpe_ndx": "https://worldperatio.com/index/nasdaq-100/",
+ "worldpe_spx": "https://worldperatio.com/index/sp-500/",
+ "worldpe_tw": "https://worldperatio.com/area/taiwan/",
+ "factset_list": "https://insight.factset.com/topic/earnings",
+ "siblis_ndx_tr": "https://siblisresearch.com/api/v1/NDX/pe-trailing",
+ "siblis_ndx_fwd": "https://siblisresearch.com/api/v1/NDX/pe-forward",
+ "siblis_indices": "https://siblisresearch.com/api/v1/indices",
+ "multpl_eps": "https://www.multpl.com/s-p-500-earnings/table/by-month",
+ "multpl_pe": "https://www.multpl.com/s-p-500-pe-ratio/table/by-month"
+}
