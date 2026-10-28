@@ -1,9 +1,7 @@
 {
- "tw_202609.zip": "https://www.twse.com.tw/staticFiles/inspection/inspection/04/001/202609_C04001.zip",
- "tw_201506.zip": "https://www.twse.com.tw/staticFiles/inspection/inspection/04/001/201506_C04001.zip",
- "tw_200501.zip": "https://www.twse.com.tw/staticFiles/inspection/inspection/04/001/200501_C04001.zip",
- "tw_199912.zip": "https://www.twse.com.tw/staticFiles/inspection/inspection/04/001/199912_C04001.zip",
- "yahoo_twii": "https://query1.finance.yahoo.com/v8/finance/chart/%5ETWII?range=max&interval=1mo",
- "yahoo_ndx": "https://query1.finance.yahoo.com/v8/finance/chart/%5ENDX?range=max&interval=1mo",
- "yahoo_gspc": "https://query1.finance.yahoo.com/v8/finance/chart/%5EGSPC?range=max&interval=1mo"
+ "cdx_wsj_new": "http://web.archive.org/cdx/search/cdx?url=wsj.com/market-data/stocks/peyields&output=json&filter=statuscode:200&collapse=timestamp:6",
+ "cdx_wsj_old": "http://web.archive.org/cdx/search/cdx?url=wsj.com/mdc/public/page/2_3021-peyield.html&output=json&filter=statuscode:200&collapse=timestamp:6",
+ "fs_article": "https://insight.factset.com/sp-500-earnings-season-update-october-23-2026",
+ "twse_t187ap03": "https://openapi.twse.com.tw/v1/opendata/t187ap03_L",
+ "bwibbu_2024": "https://www.twse.com.tw/rwd/zh/afterTrading/BWIBBU_d?date=20241031&selectType=ALL&response=json"
 }
