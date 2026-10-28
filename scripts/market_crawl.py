@@ -192,7 +192,7 @@ def taiex_trailing():
 
 # ---------------------------------------------------------------- 台股：產業 EPS（data.gov.tw 20756）
 def tw_industry():
-    rows = json.loads(get("https://openapi.twse.com.tw/v1/opendata/t187ap14_L"))
+    rows = json.loads(get("https://openapi.twse.com.tw/v1/opendata/t187ap14_L", tries=4))
     if not rows:
         return None
     y, q = rows[0]["年度"], rows[0]["季別"]
@@ -275,8 +275,17 @@ def taiex_forward(tr):
     if not os.path.exists(FACTSET):
         return None
     fs = json.load(open(FACTSET, encoding="utf-8"))
-    prof = json.loads(get("https://openapi.twse.com.tw/v1/opendata/t187ap03_L"))
-    shares = {p["公司代號"].strip(): num(p.get("已發行普通股數或TDR原股發行股數")) for p in prof}
+    shares = load("tw_shares.json", {})
+    try:
+        prof = json.loads(get("https://openapi.twse.com.tw/v1/opendata/t187ap03_L"))
+        new = {p["公司代號"].strip(): num(p.get("已發行普通股數或TDR原股發行股數")) for p in prof}
+        if len(new) > 500:
+            shares = new
+            save("tw_shares.json", shares)
+    except Exception as e:  # 證交所 OpenAPI 偶爾回傳非 JSON，改用上次的股數
+        log("發行股數取得失敗，沿用快取", type(e).__name__, len(shares))
+    if not shares:
+        raise RuntimeError("沒有發行股數資料")
     snap = load("tw_bwibbu.json", {})
     first = min(s["date"] for v in fs.values() for s in v["surveys"])
     start = dt.date.fromisoformat(first) + dt.timedelta(days=60)  # 先累積兩個月調查再開始
@@ -504,7 +513,7 @@ def main():
     if tr:
         tw["tr"] = tr
         tw["fw"] = safe("台股前瞻", taiex_forward, tr)
-        tw["ind"] = safe("產業EPS", tw_industry)
+        tw["ind"] = safe("產業EPS", tw_industry) or prev.get("idx", {}).get("TAIEX", {}).get("ind")
         last = yahoo("^TWII", "1d", "5d")[-1]
         tw["now"] = {"d": last[0], "px": r2(last[1]), "eps": tr["eps"][-1], "pe": r2(last[1] / tr["eps"][-1])}
     res["idx"]["TAIEX"] = tw
