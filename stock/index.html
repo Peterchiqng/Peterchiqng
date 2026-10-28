@@ -408,6 +408,7 @@
         if (d.pointBackgroundColor == null) d.pointBackgroundColor = d.borderColor;
         if (d.pointBorderColor == null) d.pointBorderColor = d.borderColor;
       }
+      if (d.order == null) d.order = (d.type || c.type) === 'bar' ? 2 : 1;
     });
     charts[id] = new Chart(document.getElementById(id), c);
   }
