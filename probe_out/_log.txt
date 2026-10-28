@@ -1,0 +1,7 @@
+OK tw_202609.zip 65340
+OK tw_201506.zip 57265
+OK tw_200501.zip 42877
+OK tw_199912.zip 54019
+OK yahoo_twii 34916
+OK yahoo_ndx 19176
+OK yahoo_gspc 19890
