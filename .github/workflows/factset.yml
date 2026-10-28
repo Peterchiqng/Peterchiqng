@@ -1,0 +1,38 @@
+name: FactSet 預估資料更新
+
+on:
+  schedule:
+    - cron: "30 10 * * *"   # 每天台灣時間 18:30
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "抓取最近幾天的快訊（回補歷史可填 730）"
+        default: "10"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: factset
+  cancel-in-progress: false
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 抓取鉅亨網 FactSet 快訊
+        run: python scripts/factset_crawl.py --days "${{ github.event.inputs.days || '10' }}"
+      - name: 提交資料
+        run: |
+          if git diff --quiet -- stock/data/factset.json && git ls-files --error-unmatch stock/data/factset.json >/dev/null 2>&1; then
+            echo "資料沒有變動"; exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898332+github-actions[bot]@users.noreply.github.com"
+          git add stock/data/factset.json
+          git commit -m "更新 FactSet 預估資料"
+          git push

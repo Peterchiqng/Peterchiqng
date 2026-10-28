@@ -76,16 +76,29 @@
   #sd-root .fs-tabs button{background:transparent;color:var(--mu);border:1px solid var(--ln);padding:5px 14px;font-size:12px;font-weight:500;border-radius:8px}
   #sd-root .fs-tabs button:hover{border-color:var(--ln2);color:var(--tx);background:transparent}
   #sd-root .fs-tabs button.on{border-color:var(--ac);color:var(--ac);background:var(--acw)}
-  #sd-root .fs-tabs select{width:auto;padding:6px 10px;font-size:12px}
+  #sd-root .fs-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 10px}
+  #sd-root .fs-search{display:flex;gap:6px;flex:1 1 320px;min-width:0}
+  #sd-root .fs-search input{flex:1;min-width:0;padding:8px 12px;font-size:13px}
+  #sd-root .fs-search button{padding:8px 16px;font-size:13px}
+  #sd-root .fs-bar .fs-tabs{margin:0}
+  #sd-root .fs-note.err{color:var(--up)}
+  @media(max-width:600px){#sd-root .fs-search{flex:1 1 100%}#sd-root .fs-tabs{overflow-x:auto;flex-wrap:nowrap}#sd-root .fs-tabs button{flex:0 0 auto}}
   #sd-root h3{font-size:12px;font-weight:500;color:var(--mu);margin:4px 0 8px}
   #sd-root .fs-note{font-size:12px;color:var(--mu);line-height:1.7;margin-bottom:10px}
   #sd-root .fs-method{font-size:11px;color:var(--mu2);line-height:1.8;margin:12px 0 0}
   #sd-root .fs-sub{margin-top:16px}
   </style>
   <div class="sd-panel" id="p-fs">
-    <h2>FactSet 分析師預估 <small>EPS共識分佈 · 目標價 · 評級（整理自鉅亨網「Factset 最新調查」）</small></h2>
-    <div class="fs-tabs" id="fs-tabs"><select id="fs-pick"><option value="1476" selected="">1476 儒鴻</option><option value="1477">1477 聚陽</option></select><button type="button" data-y="2026" class="on">2026 年EPS</button><button type="button" data-y="2027" class="">2027 年EPS</button><button type="button" data-y="2028" class="">2028 年EPS</button></div>
-    <div class="fs-note" id="fs-note">主畫面目前是 2330 台積電（尚無 FactSet 資料），本區塊顯示 1476 儒鴻。最新調查：≈2026-09-05，共 17 位分析師。</div>
+    <h2>FactSet 分析師預估 <small>EPS 共識 · 目標價 · 評級</small></h2>
+    <div class="fs-bar">
+      <div class="fs-search">
+        <input id="fs-q" type="text" list="fs-list" autocomplete="off" placeholder="輸入代號或名稱查 FactSet 預估，例如 2330、欣興" aria-label="查詢 FactSet 預估的股票">
+        <button id="fs-go" type="button">查詢</button>
+        <datalist id="fs-list"></datalist>
+      </div>
+      <div class="fs-tabs" id="fs-tabs"></div>
+    </div>
+    <div class="fs-note" id="fs-note">載入 FactSet 資料中…</div>
     <div id="fs-body">
       <div class="sd-cards" id="fs-cards"><div class="sd-card"><div class="l">分析師家數</div><div class="v" style="color:#94a3b8">17 位</div><div class="s">≈2026-09-05</div></div><div class="sd-card"><div class="l">平均數</div><div class="v" style="color:#facc15">24.58</div><div class="s">2026 年EPS（FactSet公布）</div></div><div class="sd-card"><div class="l">中位數</div><div class="v" style="color:#ffffff">24.47</div><div class="s">平均−中位 +0.11</div></div><div class="sd-card"><div class="l">最高估值</div><div class="v" style="color:#f87171">25.55</div><div class="s">高於中位數 +4.4%</div></div><div class="sd-card"><div class="l">最低估值</div><div class="v" style="color:#4ade80">23.23</div><div class="s">低於中位數 -5.1%</div></div><div class="sd-card"><div class="l">全距</div><div class="v" style="color:#94a3b8">2.32</div><div class="s">最高 − 最低</div></div><div class="sd-card"><div class="l">標準差（估）σ̂</div><div class="v" style="color:#f97316">0.65</div><div class="s">全距 ÷ d2(17) = 2.32 ÷ 3.588</div></div><div class="sd-card"><div class="l">變異係數 CV</div><div class="v" style="color:#fb923c">2.63%</div><div class="s">σ̂ ÷ 平均數</div></div><div class="sd-card"><div class="l">偏態指標</div><div class="v" style="color:#a78bfa">+0.17</div><div class="s">(平均−中位)÷σ̂</div></div><div class="sd-card"><div class="l">共識σ（實測）</div><div class="v" style="color:#38bdf8">0.23</div><div class="s">中位數於 4 次調查間</div></div></div>
       <div class="sd-grid">
@@ -95,8 +108,6 @@
         <div><h3>分析師評級分佈</h3><div class="sd-cv sm"><canvas id="c-fs-rate" width="867" height="406" style="display: block; box-sizing: border-box; height: 260px; width: 555px;"></canvas></div></div>
       </div>
       <div class="fs-sub sd-tblwrap" id="fs-tbls"><h3>分析師預估分佈（最新一次調查）</h3><table><tbody><tr><th>年度</th><th>家數</th><th>平均數</th><th>中位數</th><th>最高</th><th>最低</th><th>全距</th><th>σ̂（估）</th><th>CV</th><th>偏態</th><th>最高z</th><th>最低z</th></tr><tr><td>2026</td><td>17</td><td>24.58</td><td>24.47</td><td>25.55</td><td>23.23</td><td>2.32</td><td>0.65</td><td>2.63%</td><td>0.17</td><td>1.50</td><td>-2.09</td></tr><tr><td>2027</td><td>17</td><td>26.72</td><td>26.58</td><td>28.40</td><td>24.72</td><td>3.68</td><td>1.03</td><td>3.84%</td><td>0.14</td><td>1.64</td><td>-1.95</td></tr><tr><td>2028</td><td>17</td><td>29.88</td><td>30.56</td><td>32.35</td><td>26.43</td><td>5.92</td><td>1.65</td><td>5.52%</td><td>-0.41</td><td>1.50</td><td>-2.09</td></tr></tbody></table><h3 class="fs-sub">共識變化：各次調查的中位數統計（平均、中位數、標準差、最小、最大為實際計算值）</h3><table><tbody><tr><th>年度</th><th>調查次數</th><th>首次中位數</th><th>最新中位數</th><th>變動</th><th>平均</th><th>中位數</th><th>σ（實測）</th><th>最小</th><th>最大</th></tr><tr><td>2026</td><td>4</td><td>23.99</td><td>24.47</td><td>+2.0%</td><td>24.33</td><td>24.44</td><td>0.23</td><td>23.99</td><td>24.47</td></tr><tr><td>2027</td><td>3</td><td>27.32</td><td>26.58</td><td>-2.7%</td><td>27.07</td><td>27.32</td><td>0.43</td><td>26.58</td><td>27.32</td></tr><tr><td>2028</td><td>3</td><td>30.96</td><td>30.56</td><td>-1.3%</td><td>30.81</td><td>30.90</td><td>0.22</td><td>30.56</td><td>30.96</td></tr></tbody></table></div>
-      <ul class="sd-ins fs-sub" id="fs-ins"><li>分歧度：2026 年 CV 2.6% → 2027 年 CV 3.8% → 2028 年 CV 5.5%，預測年度越遠，分析師分歧越大。</li><li>2026 年EPS：平均 24.58、中位數 24.47，最高 25.55、最低 23.23；標準差估計約 0.65（CV 2.6%）。</li><li>平均數與中位數接近（偏態指標 0.17），估值分佈大致對稱。</li><li>2026 年EPS共識中位數：2026-03-23 23.99 → ≈2026-09-05 24.47（+2.0%），4 次調查間的標準差 0.23。</li><li>目標價中位數 403.5（最高 547、最低 333），相對 2026-10-15 收盤 324.0：中位數 +24.5%、最高 +68.8%、最低 +2.8%。最低估值仍高於收盤價。</li><li>目標價中位數自 2026-03-23 的 486.5 調整至 403.5（-17.1%），同期 2026 年EPS共識中位數變動 +2.0%。目標價降幅明顯大於獲利預估的變動，代表分析師主要在下調評價倍數，而不是獲利預估。</li><li>以收盤價 324.0 計算，2026 年預估本益比 13.2 倍、2027 年 12.2 倍（中位數EPS）；目標價中位數對應 2026 年 16.5 倍。</li><li>評級（2026-10-15，15 位）：積極樂觀 12、保持中立 3、保守悲觀 0。</li></ul>
-      <p class="fs-method">統計說明：平均數、中位數、最高、最低為 FactSet 公布值。FactSet 快訊沒有公布個別分析師的估值，因此「標準差 σ̂」以全距推估：σ̂ = (最高 − 最低) ÷ d2(n)，d2(n) 是常態分佈下 n 個樣本的期望全距係數（n=15 為 3.472、n=17 為 3.588），屬估計值，且對極端值敏感。「共識σ（實測）」是各次調查之中位數的實際標準差，樣本數是調查次數，次數少時僅供參考。標示 ≈ 的日期是依新聞發布時間推算。資料僅供參考，不構成投資建議。</p>
     </div>
   </div>
 
@@ -670,7 +681,31 @@
     }
   };
 
-  var fsCode = null, fsYear = null, fsSeen = null;
+  var fsCode = null, fsYear = null, fsSeen = null, fsMsg = '', fsListN = 0;
+  function fillFsList() {
+    var codes = Object.keys(FACTSET);
+    if (codes.length === fsListN) return;
+    fsListN = codes.length;
+    $('#fs-list').innerHTML = codes.map(function (c) { return '<option value="' + c + ' ' + (FACTSET[c].name || '') + '"></option>'; }).join('');
+  }
+  function fsFind(q) {
+    q = (q || '').trim();
+    if (!q) return null;
+    var m = q.match(/^(\d{4,6}[A-Za-z]?)/);
+    if (m) return { code: m[1].toUpperCase(), hit: !!FACTSET[m[1].toUpperCase()] };
+    var codes = Object.keys(FACTSET);
+    var ex = codes.filter(function (c) { return FACTSET[c].name === q; })[0] || codes.filter(function (c) { return (FACTSET[c].name || '').indexOf(q) >= 0; })[0];
+    return ex ? { code: ex, hit: true } : { code: q, hit: false };
+  }
+  function fsSearch() {
+    var inp = $('#fs-q'), r = fsFind(inp.value);
+    if (!r) return;
+    if (r.hit) { fsCode = r.code; fsMsg = ''; inp.value = ''; inp.blur(); }
+    else fsMsg = '找不到「' + r.code + '」的 FactSet 調查資料，FactSet 主要涵蓋中大型股。';
+    renderFS();
+  }
+  $('#fs-go').addEventListener('click', fsSearch);
+  $('#fs-q').addEventListener('keydown', function (e) { if (e.key === 'Enter') fsSearch(); });
 
   function median(a) {
     var s = a.slice().sort(function (x, y) { return x - y; }), h = Math.floor(s.length / 2);
@@ -699,19 +734,20 @@
     var panel = $('#p-fs'), codes = Object.keys(FACTSET);
     if (!codes.length) { panel.hidden = true; return; }
     panel.hidden = false;
-    if (model && model.code !== fsSeen) { fsSeen = model.code; if (FACTSET[model.code]) fsCode = model.code; }
+    if (model && model.code !== fsSeen) { fsSeen = model.code; if (FACTSET[model.code]) { fsCode = model.code; fsMsg = ''; } }
     if (!fsCode || !FACTSET[fsCode]) fsCode = codes[0];
 
     var d = FACTSET[fsCode], sv = d.surveys, last = sv[sv.length - 1];
     var ys = Object.keys(last.years).sort();
     if (!fsYear || ys.indexOf(String(fsYear)) < 0) fsYear = ys[0];
 
+    fillFsList();
     $('#fs-tabs').innerHTML =
-      '<select id="fs-pick">' + codes.map(function (c) { return '<option value="' + c + '"' + (c === fsCode ? ' selected' : '') + '>' + c + ' ' + FACTSET[c].name + '</option>'; }).join('') + '</select>' +
       ys.map(function (y) { return '<button type="button" data-y="' + y + '" class="' + (String(y) === String(fsYear) ? 'on' : '') + '">' + y + ' 年EPS</button>'; }).join('');
 
-    var note = '最新調查：' + (last.approx ? '≈' : '') + last.date + '，共 ' + last.n + ' 位分析師。';
-    if (model && model.code !== fsCode) note = '主畫面目前是 ' + model.code + (model.name ? ' ' + model.name : '') + '（尚無 FactSet 資料），本區塊顯示 ' + fsCode + ' ' + d.name + '。' + note;
+    var note = fsCode + ' ' + d.name + ' · 最新調查 ' + (last.approx ? '≈' : '') + last.date + '，' + last.n + ' 位分析師 · 已收錄 ' + codes.length + ' 檔';
+    $('#fs-note').classList.toggle('err', !!fsMsg);
+    if (fsMsg) note = fsMsg + ' 目前顯示 ' + fsCode + ' ' + d.name + '。';
     $('#fs-note').textContent = note;
 
     var live = model && model.code === fsCode && model.src !== 'sample';
@@ -829,15 +865,12 @@
         (tl && tl.med != null ? '；目標價中位數對應 ' + ys[0] + ' 年 ' + fmt(tl.med / e0.med, 1) + ' 倍' : '') + '。');
     }
     if (rt) ins.push('評級（' + rt.date + '，' + rt.n + ' 位）：積極樂觀 ' + rt.bull + '、保持中立 ' + rt.neutral + '、保守悲觀 ' + rt.bear + '。');
-    $('#fs-ins').innerHTML = ins.map(function (x) { return '<li>' + x + '</li>'; }).join('');
+    if ($('#fs-ins')) $('#fs-ins').innerHTML = ins.map(function (x) { return '<li>' + x + '</li>'; }).join('');
   }
 
   $('#fs-tabs').addEventListener('click', function (e) {
     var b = e.target.closest('button[data-y]'); if (!b) return;
     fsYear = b.getAttribute('data-y'); renderFS();
-  });
-  $('#fs-tabs').addEventListener('change', function (e) {
-    if (e.target.id === 'fs-pick') { fsCode = e.target.value; renderFS(); }
   });
   fetch('data/factset.json').then(function (r) { if (!r.ok) throw new Error('none'); return r.json(); })
     .then(function (obj) { Object.keys(obj).forEach(function (k) { FACTSET[k] = obj[k]; }); if (model) renderFS(); })
