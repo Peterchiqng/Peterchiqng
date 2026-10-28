@@ -158,9 +158,36 @@
 #sd-root .sd-card .s{font-size:10px;color:var(--mu2);margin-top:4px}
 #sd-root .sd-panel{background:var(--pn);border:1px solid var(--ln);border-radius:12px;padding:16px 14px 12px;margin-bottom:16px}
 #sd-root .sd-panel[hidden]{display:none}
-#sd-root .sd-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+#sd-root .sd-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+#sd-root .sd-panel,#sd-root .sd-grid>*{min-width:0}
+#sd-root .sd-cv canvas{max-width:100%}
 #sd-root .sd-grid .sd-panel{margin-bottom:0}
-@media(max-width:900px){#sd-root .sd-grid{grid-template-columns:1fr}}
+@media(max-width:900px){#sd-root .sd-grid{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){
+  body{padding:0}
+  #sd-root{padding:16px 12px;border-radius:0}
+  #sd-root h1{font-size:20px}
+  #sd-root .sd-head{margin-bottom:12px}
+  #sd-root .sd-badge{font-size:10px;padding:3px 8px}
+  #sd-root .sd-search{gap:6px}
+  #sd-root .sd-inwrap{flex:1 1 100%}
+  #sd-root .sd-search button{flex:1 1 auto;padding:10px 12px}
+  #sd-root .sd-search select{flex:1 1 40%;font-size:13px;padding:9px 8px}
+  #sd-root .sd-chips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+  #sd-root .sd-chip{flex:0 0 auto}
+  #sd-root .sd-title{gap:8px}
+  #sd-root .sd-title .nm,#sd-root .sd-title .px{font-size:18px}
+  #sd-root .sd-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  #sd-root .sd-card{padding:8px 10px}
+  #sd-root .sd-card .v{font-size:16px}
+  #sd-root .sd-panel{padding:12px 8px 8px;border-radius:10px}
+  #sd-root .sd-panel h2{padding:0 4px}
+  #sd-root .sd-cv{height:300px}
+  #sd-root .sd-cv.sm{height:230px}
+  #sd-root .sd-ins{font-size:12.5px;line-height:1.8}
+  #sd-root table{font-size:11px}
+  #sd-root th,#sd-root td{padding:6px 8px}
+}
 #sd-root .sd-cv{position:relative;height:360px}
 #sd-root .sd-cv.sm{height:260px}
 #sd-root .sd-tblwrap{overflow-x:auto}
@@ -412,13 +439,16 @@
     });
     charts[id] = new Chart(document.getElementById(id), c);
   }
+  function isMobile() { return window.innerWidth < 600; }
   function baseOpts(extra) {
+    var mob = isMobile();
     var o = {
       responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-      plugins: { legend: { labels: { color: '#94a3b8', boxWidth: 12, font: { size: 11 } } } },
+      layout: { padding: mob ? { left: 0, right: 2 } : 0 },
+      plugins: { legend: { labels: { color: '#94a3b8', boxWidth: mob ? 8 : 12, boxHeight: mob ? 8 : undefined, padding: mob ? 6 : 10, font: { size: mob ? 10 : 11 } } } },
       scales: {
-        x: { ticks: { color: '#64748b', maxTicksLimit: 12, font: { size: 10 } }, grid: { display: false } },
-        y: { ticks: { color: '#64748b', font: { size: 10 } }, grid: { color: '#1e293b' } }
+        x: { ticks: { color: '#64748b', maxTicksLimit: mob ? 5 : 12, maxRotation: mob ? 0 : 50, autoSkipPadding: mob ? 8 : 3, font: { size: mob ? 9 : 10 } }, grid: { display: false } },
+        y: { ticks: { color: '#64748b', maxTicksLimit: mob ? 6 : 11, font: { size: mob ? 9 : 10 } }, grid: { color: '#1e293b' } }
       }
     };
     if (extra) Object.keys(extra).forEach(function (k) { o.scales[k] = extra[k]; });
@@ -742,7 +772,7 @@
     if (rt) {
       mk('c-fs-rate', { type: 'doughnut', data: { labels: ['積極樂觀 ' + rt.bull + ' 位', '保持中立 ' + rt.neutral + ' 位', '保守悲觀 ' + rt.bear + ' 位'],
         datasets: [{ data: [rt.bull, rt.neutral, rt.bear], backgroundColor: [T.ac, T.mu2, T.warn], borderColor: T.pn, borderWidth: 2 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#94a3b8', font: { size: 11 } } } } } });
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: isMobile() ? 'bottom' : 'right', labels: { color: '#94a3b8', boxWidth: isMobile() ? 8 : 12, font: { size: isMobile() ? 10 : 11 } } } } } });
     } else if (charts['c-fs-rate']) { charts['c-fs-rate'].destroy(); delete charts['c-fs-rate']; }
 
     /* 表格 */
@@ -894,6 +924,13 @@
   } else {
     status('圖表函式庫（Chart.js）載入失敗，請確認網站允許載入 cdnjs.cloudflare.com 的腳本。', 'err');
   }
+
+  /* 視窗跨過手機／桌面寬度時重畫，讓圖表套用對應的字級與刻度 */
+  var lastMob = isMobile(), rzT = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(rzT);
+    rzT = setTimeout(function () { var m = isMobile(); if (m !== lastMob) { lastMob = m; render(); } }, 200);
+  });
 
   /* 系統切換深淺色時重畫 */
   if (window.matchMedia) { var mq = window.matchMedia('(prefers-color-scheme: light)'); var rr = function () { readT(); render(); }; if (mq.addEventListener) mq.addEventListener('change', rr); else if (mq.addListener) mq.addListener(rr); }
