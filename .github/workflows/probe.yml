@@ -6,9 +6,14 @@ jobs:
   p:
     if: "!contains(github.event.head_commit.message, 'probe output')"
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
-      - run: python scripts/probe.py || true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install xlrd==2.0.1
+      - run: python scripts/market_crawl.py 2>&1 | tee crawl_log.txt || true
       - run: |
           git config user.name "github-actions[bot]"; git config user.email "41898332+github-actions[bot]@users.noreply.github.com"
-          git add probe_out; git commit -m "probe output"; git push
+          git add -A market crawl_log.txt; git commit -m "probe output"; git push
