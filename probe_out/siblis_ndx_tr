@@ -1,0 +1,47 @@
+{
+  "ticker": "NDX",
+  "index_name": "NASDAQ 100 Index",
+  "currency": "USD",
+  "frequency": "daily",
+  "ratio": "pe-trailing",
+  "data": [
+    {
+      "trading_day (EOD)": "2023-12-29",
+      "value": 30.25
+    },
+    {
+      "trading_day (EOD)": "2024-06-28",
+      "value": 31.82
+    },
+    {
+      "trading_day (EOD)": "2024-12-31",
+      "value": 32.36
+    },
+    {
+      "trading_day (EOD)": "2025-03-31",
+      "value": 28.73
+    },
+    {
+      "trading_day (EOD)": "2025-06-30",
+      "value": 32.24
+    },
+    {
+      "trading_day (EOD)": "2025-09-30",
+      "value": 32.98
+    },
+    {
+      "trading_day (EOD)": "2025-12-31",
+      "value": 32.32
+    },
+    {
+      "trading_day (EOD)": "2026-06-30",
+      "value": 35.24
+    }
+  ],
+  "_meta": {
+    "tier": "free",
+    "documentation": "https://siblisresearch.com/api-guide-global-equity-valuations-database/",
+    "commercial_api": "https://siblisresearch.com",
+    "note": "Free tier — historical month-end snapshots only. For daily data, the full ticker universe, /stats and bulk downloads, get a commercial API key."
+  }
+}
