@@ -1,7 +1,7 @@
 {
- "cdx_wsj_new": "http://web.archive.org/cdx/search/cdx?url=wsj.com/market-data/stocks/peyields&output=json&filter=statuscode:200&collapse=timestamp:6",
- "cdx_wsj_old": "http://web.archive.org/cdx/search/cdx?url=wsj.com/mdc/public/page/2_3021-peyield.html&output=json&filter=statuscode:200&collapse=timestamp:6",
- "fs_article": "https://insight.factset.com/sp-500-earnings-season-update-october-23-2026",
- "twse_t187ap03": "https://openapi.twse.com.tw/v1/opendata/t187ap03_L",
- "bwibbu_2024": "https://www.twse.com.tw/rwd/zh/afterTrading/BWIBBU_d?date=20241031&selectType=ALL&response=json"
+ "wb_2015": "https://web.archive.org/web/20150705052119id_/http://www.wsj.com/mdc/public/page/2_3021-peyield.html",
+ "wb_2018": "https://web.archive.org/web/20181102011757id_/http://www.wsj.com/mdc/public/page/2_3021-peyield.html",
+ "wb_2020": "https://web.archive.org/web/20200401012914id_/https://www.wsj.com/market-data/stocks/peyields",
+ "wb_2023": "https://web.archive.org/web/20230801014402id_/https://www.wsj.com/market-data/stocks/peyields",
+ "wb_2026": "https://web.archive.org/web/20260217214919id_/https://www.wsj.com/market-data/stocks/peyields"
 }
