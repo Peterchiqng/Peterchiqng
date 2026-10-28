@@ -35,10 +35,16 @@ TZ = dt.timezone(dt.timedelta(hours=8))
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"
 TODAY = dt.datetime.now(TZ).date()
 LOG = []
+T0 = time.time()
+BUDGET = float(os.environ.get("CRAWL_BUDGET_MIN", "35")) * 60  # 回補用時間上限，未完成的下次再補
+
+
+def time_left():
+    return BUDGET - (time.time() - T0)
 
 
 def log(*a):
-    s = " ".join(str(x) for x in a)
+    s = f"[{time.time() - T0:6.0f}s] " + " ".join(str(x) for x in a)
     print(s, flush=True)
     LOG.append(s)
 
@@ -144,7 +150,7 @@ def twse_month_pe(ym):
 
     y, m = ym.split("-")
     u = f"https://www.twse.com.tw/staticFiles/inspection/inspection/04/001/{y}{m}_C04001.zip"
-    z = zipfile.ZipFile(io.BytesIO(get(u, binary=True)))
+    z = zipfile.ZipFile(io.BytesIO(get(u, binary=True, tries=2, timeout=25)))
     name = [n for n in z.namelist() if n.lower().endswith((".xls", ".xlsx"))][0]
     book = xlrd.open_workbook(file_contents=z.read(name), encoding_override="cp950")
     for sh in book.sheets():
@@ -164,13 +170,19 @@ def taiex_trailing():
     last_month = (TODAY.replace(day=1) - dt.timedelta(days=1)).strftime("%Y-%m")
     todo = [ym for ym in months_between("2000-01", last_month)
             if ym not in cache or (cache[ym] is None and ym >= (TODAY - dt.timedelta(days=100)).strftime("%Y-%m"))]
-    for ym in todo:
+    for i, ym in enumerate(todo):
+        if time_left() < BUDGET * 0.55:
+            log("台股月報回補暫停（時間預算），剩", len(todo) - i, "個月下次補")
+            break
         try:
             cache[ym] = twse_month_pe(ym)
         except Exception as e:
             cache[ym] = None if ym < (TODAY - dt.timedelta(days=100)).strftime("%Y-%m") else cache.get(ym)
             log("twse pe", ym, "失敗", type(e).__name__)
-        time.sleep(0.6)
+        if i % 20 == 19:
+            save("twse_pe.json", cache)
+            log("台股月報進度", ym)
+        time.sleep(0.3)
     save("twse_pe.json", cache)
     log("台股月報本益比", sum(v is not None for v in cache.values()), "個月，新抓", len(todo))
     px = monthly_close(yahoo("^TWII", "1mo", "max"))
@@ -217,7 +229,7 @@ def tw_industry():
 def bwibbu(date):
     """回傳 {code: (close, pe)}；非交易日回傳 None"""
     u = f"https://www.twse.com.tw/rwd/zh/afterTrading/BWIBBU_d?date={date.strftime('%Y%m%d')}&selectType=ALL&response=json"
-    j = json.loads(get(u))
+    j = json.loads(get(u, tries=2, timeout=25))
     if j.get("stat") != "OK" or not j.get("data"):
         return None
     f = j["fields"]
@@ -411,24 +423,31 @@ def wsj_forward():
     for orig in ("wsj.com/mdc/public/page/2_3021-peyield.html", "wsj.com/market-data/stocks/peyields"):
         try:
             cdx = json.loads(get("http://web.archive.org/cdx/search/cdx?url=" + orig +
-                                 "&output=json&filter=statuscode:200&collapse=timestamp:6", timeout=90))
+                                 "&output=json&filter=statuscode:200&collapse=timestamp:6", tries=2, timeout=60))
             snaps += [(r[1], r[2]) for r in cdx[1:]]
         except Exception as e:
             log("CDX 失敗", orig, type(e).__name__)
     newn = 0
-    for ts, orig in snaps:
-        if ts in done:
-            continue
+    todo = [(ts, o) for ts, o in snaps if ts not in done]
+    log("Wayback 待抓", len(todo))
+    for i, (ts, orig) in enumerate(todo):
+        if time_left() < BUDGET * 0.15:
+            log("Wayback 回補暫停（時間預算），剩", len(todo) - i)
+            break
+        if i % 15 == 14:
+            cache["done"] = sorted(done)
+            save("wsj_pe.json", cache)
+            log("Wayback 進度", ts)
         try:
-            r = parse_wsj(get(f"https://web.archive.org/web/{ts}id_/{orig}", timeout=60))
+            r = parse_wsj(get(f"https://web.archive.org/web/{ts}id_/{orig}", tries=2, timeout=30))
+            done.add(ts)  # 抓到但解析不到也算完成；連線失敗下次重試
         except Exception as e:
             r = None
             log("wayback", ts, type(e).__name__)
         if r:
             cache["obs"][r["d"]] = {k: v for k, v in r.items() if k != "d"}
             newn += 1
-        done.add(ts)
-        time.sleep(1.0)
+        time.sleep(0.5)
     try:
         r = parse_wsj(get("https://www.wsj.com/market-data/stocks/peyields"))
         if r:

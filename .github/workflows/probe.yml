@@ -14,6 +14,8 @@ jobs:
           python-version: "3.12"
       - run: pip install xlrd==2.0.1
       - run: python scripts/market_crawl.py 2>&1 | tee crawl_log.txt || true
+        env:
+          CRAWL_BUDGET_MIN: "25"
       - run: |
           git config user.name "github-actions[bot]"; git config user.email "41898332+github-actions[bot]@users.noreply.github.com"
           git add -A market crawl_log.txt; git commit -m "probe output"; git push

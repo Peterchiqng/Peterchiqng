@@ -1,0 +1,35 @@
+name: 大盤估值資料更新
+
+on:
+  schedule:
+    - cron: "10 22 * * 0-4"   # 台灣時間週一至週五 06:10（台股前一交易日、美股收盤後）
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: data-commit
+  cancel-in-progress: false
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install xlrd==2.0.1
+      - name: 抓取大盤估值資料
+        run: python scripts/market_crawl.py
+      - name: 提交資料
+        run: |
+          git add market/data
+          if git diff --cached --quiet; then echo "資料沒有變動"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898332+github-actions[bot]@users.noreply.github.com"
+          git commit -m "更新大盤估值資料"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push

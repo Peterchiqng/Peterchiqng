@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>大盤估值儀表板</title>
+<style>
+html,body{margin:0;background:#0E1116}
+@media (prefers-color-scheme: light){html,body{background:#F6F6F3}}
+body{padding:12px}
+#mk{--bg:#0E1116;--pn:#161A21;--cd:#1B2029;--ln:#262B34;--ln2:#3A404B;--tx:#E6E8EB;--tx2:#C4C9D1;--mu:#8B93A1;--mu2:#646B77;--ac:#5B8DEF;--acw:rgba(91,141,239,.14);--up:#F0524D;--dn:#22B573;--warn:#E0A23B;--grid:#20252D;--b0:#22B573;--b1:#7FC8A0;--b2:#8B93A1;--b3:#E0A23B;--b4:#F0524D;--px:#E6E8EB;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  background:var(--bg);color:var(--tx);padding:24px 20px;border-radius:16px;font-family:'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif;max-width:1200px;margin:0 auto;box-sizing:border-box}
+@media (prefers-color-scheme: light){
+  #mk{--bg:#F6F6F3;--pn:#FFFFFF;--cd:#FAFAF8;--ln:#E4E4DF;--ln2:#CFCFC8;--tx:#1D2125;--tx2:#3D434A;--mu:#6B7280;--mu2:#9AA0A8;--ac:#2F6FEB;--acw:rgba(47,111,235,.10);--up:#D9342B;--dn:#12925A;--warn:#B7791F;--grid:#EEEEEA;--b0:#12925A;--b1:#5BAF84;--b2:#9AA0A8;--b3:#C98A2B;--b4:#D9342B;--px:#1D2125}
+}
+#mk *{box-sizing:border-box}
+#mk h1{font-size:20px;margin:0;font-weight:600;letter-spacing:.2px}
+#mk h2{font-size:14px;font-weight:600;margin:0;color:var(--tx)}
+#mk h2 small{font-weight:400;color:var(--mu);margin-left:8px;font-size:11px}
+#mk .hd{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+#mk .sub{margin:4px 0 0;color:var(--mu);font-size:12px}
+#mk .badge{font-size:11px;padding:4px 10px;border-radius:999px;border:1px solid var(--ln);color:var(--mu);white-space:nowrap;font-family:var(--mono)}
+#mk .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+#mk .seg{display:inline-flex;border:1px solid var(--ln);border-radius:10px;padding:3px;background:var(--pn);gap:2px}
+#mk .seg button{background:transparent;border:0;color:var(--mu);padding:7px 14px;border-radius:7px;font-size:13px;font-family:inherit;cursor:pointer;white-space:nowrap}
+#mk .seg button:hover{color:var(--tx)}
+#mk .seg button.on{background:var(--acw);color:var(--ac);font-weight:600}
+#mk .seg.sm button{padding:5px 10px;font-size:12px}
+#mk .bar .lbl{font-size:12px;color:var(--mu)}
+#mk .cards{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-bottom:16px}
+#mk .card{background:var(--pn);border:1px solid var(--ln);border-radius:12px;padding:12px 14px;min-width:0}
+#mk .card .l{font-size:11px;color:var(--mu);margin-bottom:4px}
+#mk .card .v{font-family:var(--mono);font-size:19px;font-weight:600;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#mk .card .s{font-size:10.5px;color:var(--mu2);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#mk .pn{background:var(--pn);border:1px solid var(--ln);border-radius:14px;padding:16px 16px 12px;margin-bottom:14px;min-width:0}
+#mk .ph{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+#mk .pt{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+#mk .no{font-family:var(--mono);font-size:11px;color:var(--ac);border:1px solid var(--ac);border-radius:6px;padding:1px 6px}
+#mk .st{font-size:12px;color:var(--mu);margin:2px 0 10px;min-height:17px}
+#mk .st b{font-family:var(--mono);font-weight:600;color:var(--tx)}
+#mk .cv{position:relative;height:360px;width:100%}
+#mk .cv.sm{height:300px}
+#mk .grid2{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:14px}
+#mk .grid2 .pn{margin-bottom:0}
+#mk .row{margin-bottom:14px}
+#mk .empty{display:flex;align-items:center;justify-content:center;height:100%;color:var(--mu);font-size:13px;text-align:center;padding:0 20px;line-height:1.7}
+#mk .up{color:var(--up)} #mk .dn{color:var(--dn)} #mk .wn{color:var(--warn)}
+#mk details{font-size:12px;color:var(--mu);margin-top:6px}
+#mk details summary{cursor:pointer;color:var(--mu);padding:6px 0}
+#mk details ul{margin:6px 0 0;padding-left:18px;line-height:1.9}
+#mk details a{color:var(--ac);text-decoration:none}
+#mk .msg{padding:40px 0;text-align:center;color:var(--mu);font-size:13px}
+@media (max-width:900px){#mk .cards{grid-template-columns:repeat(3,minmax(0,1fr))}#mk .grid2{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:600px){
+  body{padding:0}
+  #mk{padding:16px 12px;border-radius:0}
+  #mk .cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  #mk .card{padding:10px 12px}
+  #mk .card .v{font-size:17px}
+  #mk .pn{padding:14px 10px 10px}
+  #mk .cv{height:300px} #mk .cv.sm{height:260px}
+  #mk .seg{width:100%} #mk .seg button{flex:1;padding:7px 6px}
+  #mk .bar .lbl{display:none}
+}
+</style>
+</head>
+<body>
+<div id="mk">
+  <div class="hd">
+    <div>
+      <h1>大盤估值儀表板</h1>
+      <p class="sub">EPS 走勢 · 未來一年預估 EPS · 本益比河流 ±2σ · Forward PE 河流</p>
+    </div>
+    <span class="badge" id="upd">載入中…</span>
+  </div>
+
+  <div class="bar">
+    <div class="seg" id="s-idx" role="tablist" aria-label="指數">
+      <button data-v="TAIEX" class="on">台股加權</button>
+      <button data-v="SPX">S&amp;P 500</button>
+      <button data-v="NDX">Nasdaq-100</button>
+    </div>
+    <span class="lbl">統計期間</span>
+    <div class="seg sm" id="s-win" aria-label="統計期間">
+      <button data-v="5">5年</button>
+      <button data-v="10" class="on">10年</button>
+      <button data-v="20">20年</button>
+      <button data-v="0">全部</button>
+    </div>
+  </div>
+
+  <div id="body"><div class="msg">載入資料中…</div></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+(function () {
+  'use strict';
+  var root = document.getElementById('mk');
+  var $ = function (s) { return root.querySelector(s); };
+  var DATA = null, charts = {};
+  var st = { idx: 'TAIEX', win: 10, v3: 'river', v4: 'river' };
+  try { var sv = JSON.parse(localStorage.getItem('mk-state') || '{}'); Object.assign(st, sv); } catch (e) {}
+  var h = location.hash.replace('#', '');
+  if (['TAIEX', 'SPX', 'NDX'].indexOf(h) >= 0) st.idx = h;
+  function persist() { try { localStorage.setItem('mk-state', JSON.stringify(st)); } catch (e) {} }
+
+  // ---------- 主題 ----------
+  var T = {};
+  function readT() {
+    var cs = getComputedStyle(root);
+    ['tx', 'tx2', 'mu', 'mu2', 'ln', 'grid', 'ac', 'up', 'dn', 'warn', 'b0', 'b1', 'b2', 'b3', 'b4', 'px', 'pn'].forEach(function (k) { T[k] = cs.getPropertyValue('--' + k).trim(); });
+  }
+  function rgba(hex, a) {
+    var x = hex.replace('#', ''); if (x.length === 3) x = x.split('').map(function (c) { return c + c; }).join('');
+    return 'rgba(' + parseInt(x.slice(0, 2), 16) + ',' + parseInt(x.slice(2, 4), 16) + ',' + parseInt(x.slice(4, 6), 16) + ',' + a + ')';
+  }
+  function isMobile() { return window.innerWidth <= 600; }
+
+  // ---------- 工具 ----------
+  function f(x, d) { if (x == null || isNaN(x)) return '—'; return Number(x).toLocaleString('en-US', { minimumFractionDigits: d == null ? 2 : d, maximumFractionDigits: d == null ? 2 : d }); }
+  function pct(x, d) { if (x == null || isNaN(x)) return '—'; return (x >= 0 ? '+' : '') + (x * 100).toFixed(d == null ? 1 : d) + '%'; }
+  function sig(z) { if (z == null || isNaN(z)) return '—'; return (z >= 0 ? '+' : '') + z.toFixed(2) + 'σ'; }
+  function zcls(z) { return z >= 1 ? 'up' : z <= -1 ? 'dn' : ''; }
+  function stats(a) {
+    var v = a.filter(function (x) { return x != null && isFinite(x); });
+    if (v.length < 3) return null;
+    var m = v.reduce(function (s, x) { return s + x; }, 0) / v.length;
+    var sd = Math.sqrt(v.reduce(function (s, x) { return s + (x - m) * (x - m); }, 0) / v.length);
+    return { m: m, sd: sd, n: v.length };
+  }
+  function cutoff(years) {
+    if (!years) return '0000';
+    var d = new Date(); d.setFullYear(d.getFullYear() - years);
+    return d.toISOString().slice(0, 10);
+  }
+  function startIdx(labels, years) {
+    var c = cutoff(years);
+    for (var i = 0; i < labels.length; i++) if (labels[i] >= c.slice(0, labels[i].length)) return i;
+    return labels.length;
+  }
+  function slice(o, i0) { var r = {}; Object.keys(o).forEach(function (k) { r[k] = Array.isArray(o[k]) ? o[k].slice(i0) : o[k]; }); return r; }
+
+  // 趨勢資料：月資料最後補上今日點（若較新）
+  function trailing(I) {
+    var t = I.tr; if (!t) return null;
+    var o = { m: t.m.slice(), px: t.px.slice(), pe: t.pe.slice(), eps: t.eps.slice() };
+    var nw = I.now;
+    if (nw && nw.d && nw.d.slice(0, 7) > o.m[o.m.length - 1]) {
+      o.m.push(nw.d.slice(0, 7)); o.px.push(nw.px); o.pe.push(nw.pe); o.eps.push(nw.eps);
+    }
+    return o;
+  }
+  function forward(I, tr) {
+    var w = I.fw; if (!w || !w.d || !w.d.length) return null;
+    var o = { d: w.d.slice(), px: w.px.slice(), fpe: w.fpe.slice(), feps: w.feps.slice(), eps: [] , cov: w.cov ? w.cov.slice() : null };
+    var mm = {}; tr.m.forEach(function (m, i) { mm[m] = tr.eps[i]; });
+    var keys = tr.m;
+    o.d.forEach(function (d, i) {
+      if (w.eps && w.eps[i] != null) { o.eps.push(w.eps[i]); return; }
+      var ym = d.slice(0, 7), v = null;
+      for (var k = keys.length - 1; k >= 0; k--) if (keys[k] <= ym) { v = mm[keys[k]]; break; }
+      o.eps.push(v);
+    });
+    return o;
+  }
+
+  // ---------- Chart.js 共用 ----------
+  function baseOpts(extra) {
+    var mob = isMobile();
+    var o = {
+      responsive: true, maintainAspectRatio: false, animation: false,
+      interaction: { mode: 'index', intersect: false },
+      layout: { padding: { left: 2, right: mob ? 2 : 8, top: 4, bottom: 0 } },
+      plugins: {
+        legend: { position: 'top', align: 'end', labels: { color: T.mu, boxWidth: 10, boxHeight: 10, font: { size: mob ? 10 : 11 }, padding: mob ? 8 : 12, usePointStyle: true, pointStyle: 'rectRounded' } },
+        tooltip: { backgroundColor: T.pn, titleColor: T.tx, bodyColor: T.tx2, borderColor: T.ln, borderWidth: 1, padding: 10, bodyFont: { family: "'IBM Plex Mono',monospace", size: 11 }, titleFont: { size: 12 } }
+      },
+      scales: {
+        x: { grid: { display: false }, border: { color: T.ln }, ticks: { color: T.mu, maxRotation: 0, autoSkip: true, maxTicksLimit: mob ? 5 : 9, font: { size: mob ? 10 : 11 } } },
+        y: { grid: { color: T.grid }, border: { display: false }, ticks: { color: T.mu, font: { size: mob ? 10 : 11 }, maxTicksLimit: 7 } }
+      }
+    };
+    return Object.assign(o, extra || {});
+  }
+  function draw(id, cfg) {
+    if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+    var el = document.getElementById(id); if (!el) return;
+    if (typeof Chart === 'undefined') { el.parentNode.innerHTML = '<div class="empty">圖表元件載入失敗，請重新整理</div>'; return; }
+    charts[id] = new Chart(el.getContext('2d'), cfg);
+  }
+  function line(label, data, color, o) {
+    return Object.assign({ type: 'line', label: label, data: data, borderColor: color, backgroundColor: color, borderWidth: 1.8, pointRadius: 0, pointHoverRadius: 3, tension: 0.15, spanGaps: true, order: 1 }, o || {});
+  }
+
+  var BANDS = [{ k: -2, n: '−2σ', c: 'b0' }, { k: -1, n: '−1σ', c: 'b1' }, { k: 0, n: '平均', c: 'b2' }, { k: 1, n: '+1σ', c: 'b3' }, { k: 2, n: '+2σ', c: 'b4' }];
+
+  // 河流圖：價格 vs EPS × (μ + kσ)
+  function riverCfg(labels, px, eps, S, pxName, log) {
+    var ds = [];
+    BANDS.forEach(function (b, i) {
+      var mult = S.m + b.k * S.sd;
+      ds.push(line(b.n + ' ' + mult.toFixed(1) + 'x', eps.map(function (e) { return e == null ? null : e * mult; }), T[b.c], {
+        borderWidth: b.k === 0 ? 1.4 : 1, borderDash: b.k === 0 ? [5, 4] : [], tension: 0,
+        fill: i === 0 ? false : '-1', backgroundColor: rgba(T[BANDS[Math.max(0, i - 1)].c] || T.mu, 0.10), order: 3
+      }));
+    });
+    ds.push(line(pxName, px, T.px, { borderWidth: 2.2, order: 0, fill: false }));
+    var y = { grid: { color: T.grid }, border: { display: false }, ticks: { color: T.mu, maxTicksLimit: 7, font: { size: isMobile() ? 10 : 11 }, callback: function (v) { return Number(v).toLocaleString('en-US'); } } };
+    if (log) y.type = 'logarithmic';
+    var o = baseOpts(); o.scales.y = y;
+    o.plugins.tooltip.callbacks = { label: function (c) { return ' ' + c.dataset.label.split(' ')[0] + '  ' + f(c.parsed.y, 0); } };
+    return { type: 'line', data: { labels: labels, datasets: ds }, options: o };
+  }
+  // σ 通道：本益比 vs 水平帶
+  function sigmaCfg(labels, pe, S, name) {
+    var ds = BANDS.map(function (b, i) {
+      var v = S.m + b.k * S.sd;
+      return line(b.n + ' ' + v.toFixed(1) + 'x', labels.map(function () { return v; }), T[b.c], {
+        borderWidth: b.k === 0 ? 1.4 : 1, borderDash: b.k === 0 ? [5, 4] : [4, 4], tension: 0, pointHoverRadius: 0,
+        fill: i === 0 ? false : '-1', backgroundColor: rgba(T[BANDS[Math.max(0, i - 1)].c], 0.07), order: 3
+      });
+    });
+    ds.push(line(name, pe, T.ac, { borderWidth: 2, order: 0 }));
+    var o = baseOpts();
+    o.scales.y.ticks.callback = function (v) { return v + 'x'; };
+    o.plugins.tooltip.callbacks = { label: function (c) { return ' ' + c.dataset.label.split(' ')[0] + '  ' + f(c.parsed.y, 1) + 'x'; } };
+    return { type: 'line', data: { labels: labels, datasets: ds }, options: o };
+  }
+
+  // ---------- 版面 ----------
+  function panel(no, title, sub, extra) {
+    return '<div class="pn"><div class="ph"><div class="pt"><span class="no">' + no + '</span><h2>' + title + '<small>' + sub + '</small></h2></div>' + (extra || '') + '</div>';
+  }
+  function viewSeg(key) {
+    return '<div class="seg sm" data-view="' + key + '"><button data-v="river"' + (st[key] === 'river' ? ' class="on"' : '') + '>河流圖</button><button data-v="sigma"' + (st[key] === 'sigma' ? ' class="on"' : '') + '>本益比 σ</button></div>';
+  }
+
+  function render() {
+    if (!DATA) return;
+    readT();
+    Object.keys(charts).forEach(function (k) { charts[k].destroy(); }); charts = {};
+    root.querySelectorAll('#s-idx button').forEach(function (b) { b.classList.toggle('on', b.dataset.v === st.idx); });
+    root.querySelectorAll('#s-win button').forEach(function (b) { b.classList.toggle('on', +b.dataset.v === st.win); });
+
+    var I = DATA.idx[st.idx] || {};
+    var body = $('#body');
+    var tr = trailing(I);
+    if (!tr) { body.innerHTML = '<div class="msg">' + (I.short || st.idx) + ' 資料暫時無法取得</div>'; return; }
+    var fw = forward(I, tr);
+
+    // 統計期間
+    var i0 = startIdx(tr.m, st.win);
+    if (tr.m.length - i0 < 24) i0 = Math.max(0, tr.m.length - 24);
+    var W = slice(tr, i0);
+    var S = stats(W.pe);
+    var last = tr.m.length - 1;
+    var pe = tr.pe[last], eps = tr.eps[last], px = tr.px[last];
+    var z = S ? (pe - S.m) / S.sd : null;
+
+    var FW = null, FS = null, fz = null, flast = null;
+    if (fw) {
+      var j0 = startIdx(fw.d, st.win);
+      if (fw.d.length - j0 < 12) j0 = Math.max(0, fw.d.length - 12);
+      FW = slice(fw, j0); FS = stats(FW.fpe);
+      flast = fw.d.length - 1;
+      fz = FS ? (fw.fpe[flast] - FS.m) / FS.sd : null;
+    }
+    var winTxt = st.win ? st.win + '年' : '全部期間';
+    var actualYears = ((tr.m.length - i0) / 12).toFixed(0);
+    var asof = (I.now && I.now.d) || tr.m[last];
+    var yoyIdx = last - 12;
+    var yoy = yoyIdx >= 0 ? eps / tr.eps[yoyIdx] - 1 : null;
+    var g = fw ? fw.feps[flast] / fw.eps[flast] - 1 : null;
+
+    // KPI
+    var cards = [
+      ['指數', f(px, 0), asof],
+      ['近四季 EPS', f(eps, 2), '年增 ' + pct(yoy)],
+      ['本益比', f(pe, 1) + 'x', S ? '<span class="' + zcls(z) + '">' + sig(z) + '</span> · ' + winTxt + '均值 ' + f(S.m, 1) + 'x' : ''],
+      ['未來一年預估 EPS', fw ? f(fw.feps[flast], 2) : '—', fw ? fw.d[flast] : '無資料'],
+      ['Forward PE', fw ? f(fw.fpe[flast], 1) + 'x' : '—', FS ? '<span class="' + zcls(fz) + '">' + sig(fz) + '</span> · 均值 ' + f(FS.m, 1) + 'x' : ''],
+      ['預估 EPS 成長', fw ? pct(g) : '—', '前瞻 ÷ 近四季']
+    ];
+    var html = '<div class="cards">' + cards.map(function (c, k) {
+      var col = k === 5 && g != null ? (g >= 0 ? 'var(--up)' : 'var(--dn)') : k === 2 || k === 4 ? 'var(--ac)' : 'var(--tx)';
+      return '<div class="card"><div class="l">' + c[0] + '</div><div class="v" style="color:' + col + '">' + c[1] + '</div><div class="s">' + c[2] + '</div></div>';
+    }).join('') + '</div>';
+
+    // Division 1
+    var hasInd = I.ind && I.ind.rows && I.ind.rows.length;
+    var d1 = panel('01', '大盤平均 EPS 走勢', '近四季 EPS · 年增率') +
+      '<div class="st">' + I.short + ' 近四季 EPS <b>' + f(eps, 2) + '</b>，年增 <b class="' + (yoy >= 0 ? 'up' : 'dn') + '">' + pct(yoy) + '</b></div>' +
+      '<div class="cv' + (hasInd ? ' sm' : '') + '"><canvas id="c1"></canvas></div></div>';
+    if (hasInd) {
+      d1 = '<div class="grid2 row">' + d1 + panel('01', '產業獲利結構', I.ind.period + ' 累計稅後淨利 · 億元') +
+        '<div class="st">上市 ' + I.ind.n + ' 家公司，前 12 大產業</div><div class="cv sm"><canvas id="c1b"></canvas></div></div></div>';
+    }
+    // Division 2
+    var d2 = panel('02', '未來一年預估 EPS', st.idx === 'TAIEX' ? 'FactSet 共識彙總 · 未來 12 個月' : 'Birinyi 預估 · 未來 12 個月') +
+      '<div class="st">' + (fw ? '最新 <b>' + f(fw.feps[flast], 2) + '</b>，較近四季 <b class="' + (g >= 0 ? 'up' : 'dn') + '">' + pct(g) + '</b>' + (fw.cov ? '，涵蓋 <b>' + pct(fw.cov[flast], 0).replace('+', '') + '</b> 市值' : '') : '尚無前瞻資料') + '</div>' +
+      '<div class="cv sm">' + (fw ? '<canvas id="c2"></canvas>' : '<div class="empty">尚無前瞻 EPS 資料</div>') + '</div></div>';
+    // Division 3
+    var d3 = panel('03', '本益比河流圖', winTxt + '本益比 μ ± 1σ / 2σ', viewSeg('v3')) +
+      '<div class="st">' + (S ? '目前 <b>' + f(pe, 1) + 'x</b>，位於 <b class="' + zcls(z) + '">' + sig(z) + '</b>（' + (st.win && actualYears < st.win ? '可得 ' + actualYears + ' 年 · ' : '') + '均值 ' + f(S.m, 1) + 'x · σ ' + f(S.sd, 1) + '）' : '') + '</div>' +
+      '<div class="cv"><canvas id="c3"></canvas></div></div>';
+    // Division 4
+    var fyrs = FW ? ((new Date(FW.d[FW.d.length - 1]) - new Date(FW.d[0])) / 3.156e10).toFixed(1) : 0;
+    var d4 = panel('04', 'Forward PE 河流圖', (FW ? '近 ' + fyrs + ' 年' : '') + ' Forward PE μ ± 1σ / 2σ', fw ? viewSeg('v4') : '') +
+      '<div class="st">' + (FS ? '目前 <b>' + f(fw.fpe[flast], 1) + 'x</b>，位於 <b class="' + zcls(fz) + '">' + sig(fz) + '</b>（均值 ' + f(FS.m, 1) + 'x · σ ' + f(FS.sd, 1) + ' · ' + FS.n + ' 個觀測點）' : '') + '</div>' +
+      '<div class="cv">' + (fw ? '<canvas id="c4"></canvas>' : '<div class="empty">尚無 Forward PE 資料</div>') + '</div></div>';
+
+    html += d1 + d2 + d3 + d4 + notes(I);
+    body.innerHTML = html;
+
+    // ---- 圖 1：EPS 走勢 + 年增率
+    var yo = W.eps.map(function (e, k) { var p = i0 + k - 12; return p >= 0 && tr.eps[p] ? (e / tr.eps[p] - 1) * 100 : null; });
+    var o1 = baseOpts();
+    o1.scales.y.ticks.callback = function (v) { return Number(v).toLocaleString('en-US'); };
+    o1.scales.y1 = { position: 'right', grid: { display: false }, border: { display: false }, ticks: { color: T.mu2, maxTicksLimit: 6, font: { size: isMobile() ? 9 : 10 }, callback: function (v) { return v + '%'; } } };
+    o1.plugins.tooltip.callbacks = { label: function (c) { return ' ' + c.dataset.label + '  ' + (c.dataset.yAxisID === 'y1' ? (c.parsed.y == null ? '—' : c.parsed.y.toFixed(1) + '%') : f(c.parsed.y, 2)); } };
+    draw('c1', { type: 'bar', data: { labels: W.m, datasets: [
+      line('近四季 EPS', W.eps, T.ac, { borderWidth: 2.2, order: 0 }),
+      { type: 'bar', label: 'EPS 年增率', data: yo, yAxisID: 'y1', order: 2, borderWidth: 0, barPercentage: 1, categoryPercentage: 0.9,
+        backgroundColor: yo.map(function (v) { return v == null ? 'transparent' : v >= 0 ? rgba(T.up, 0.35) : rgba(T.dn, 0.35); }) }
+    ] }, options: o1 });
+
+    if (hasInd) {
+      var rows = I.ind.rows.slice(0, 12);
+      var ob = baseOpts({ indexAxis: 'y' });
+      ob.plugins.legend.display = false;
+      ob.scales.x = { grid: { color: T.grid }, border: { display: false }, ticks: { color: T.mu, maxTicksLimit: 5, font: { size: 10 }, callback: function (v) { return Number(v).toLocaleString('en-US'); } } };
+      ob.scales.y = { grid: { display: false }, border: { color: T.ln }, ticks: { color: T.tx2, font: { size: 11 }, autoSkip: false } };
+      ob.plugins.tooltip.callbacks = { label: function (c) { var r = rows[c.dataIndex]; return [' 稅後淨利 ' + f(r[1], 0) + ' 億', ' ' + r[2] + ' 家 · EPS 中位數 ' + f(r[3], 2)]; } };
+      ob.interaction = { mode: 'nearest', axis: 'y', intersect: false };
+      draw('c1b', { type: 'bar', data: { labels: rows.map(function (r) { return r[0].replace(/業$/, ''); }), datasets: [{ label: '稅後淨利', data: rows.map(function (r) { return r[1]; }), backgroundColor: rows.map(function (r, k) { return k === 0 ? T.ac : rgba(T.ac, 0.45); }), borderWidth: 0, borderRadius: 3, barPercentage: 0.75 }] }, options: ob });
+    }
+
+    // ---- 圖 2：前瞻 EPS vs 近四季
+    if (fw) {
+      var F2 = fw;
+      var o2 = baseOpts();
+      o2.scales.y.ticks.callback = function (v) { return Number(v).toLocaleString('en-US'); };
+      o2.plugins.tooltip.callbacks = { label: function (c) { return ' ' + c.dataset.label + '  ' + f(c.parsed.y, 2); } };
+      draw('c2', { type: 'line', data: { labels: F2.d, datasets: [
+        line('未來一年預估 EPS', F2.feps, T.warn, { borderWidth: 2.2, pointRadius: F2.d.length < 40 ? 2 : 0 }),
+        line('近四季 EPS', F2.eps, T.ac, { borderWidth: 1.6, borderDash: [4, 3] })
+      ] }, options: o2 });
+    }
+
+    // ---- 圖 3：河流 / σ
+    if (S) {
+      var logScale = st.win === 0 && (W.m.length > 360);
+      draw('c3', st.v3 === 'sigma' ? sigmaCfg(W.m, W.pe, S, '本益比') : riverCfg(W.m, W.px, W.eps, S, '指數', logScale));
+    }
+    // ---- 圖 4：Forward PE 河流 / σ
+    if (FW && FS) {
+      draw('c4', st.v4 === 'sigma' ? sigmaCfg(FW.d, FW.fpe, FS, 'Forward PE') : riverCfg(FW.d, FW.px, FW.feps, FS, '指數', false));
+    }
+  }
+
+  function notes(I) {
+    var common = '<li>河流圖：以統計期間內本益比的平均值 μ 與標準差 σ，畫出 EPS ×（μ−2σ、μ−1σ、μ、μ+1σ、μ+2σ）五條線，與指數比較。</li>';
+    var s = {
+      TAIEX: '<li>本益比：<a href="https://www.twse.com.tw/zh/trading/statistics/index04.html" target="_blank" rel="noopener">證交所月報</a>大盤本益比（月底總市值 ÷ 近四季稅後純益），EPS = 月底加權指數 ÷ 大盤本益比；本月以最新收盤價計算。</li>' +
+        '<li>產業獲利：<a href="https://data.gov.tw/dataset/20756" target="_blank" rel="noopener">政府資料開放平臺 · 上市公司各產業EPS統計資訊</a>（證交所 OpenAPI t187ap14_L）。</li>' +
+        '<li>未來一年預估 EPS：彙總鉅亨網 FactSet 調查的個股共識 EPS（近 120 天內、依日曆年加權成未來 12 個月），以發行股數加權計算涵蓋個股的預估盈餘成長，再乘上大盤近四季 EPS。涵蓋率顯示於 02 區。</li>',
+      SPX: '<li>本益比與 EPS：<a href="https://www.multpl.com/s-p-500-pe-ratio" target="_blank" rel="noopener">multpl.com</a>（近四季實際盈餘，1871 年起），指數 = 本益比 × EPS。</li>' +
+        '<li>Forward PE：<a href="https://www.wsj.com/market-data/stocks/peyields" target="_blank" rel="noopener">WSJ P/Es &amp; Yields</a>（Birinyi Associates 未來 12 個月營業盈餘預估，每週五更新），2013 年起以 Wayback Machine 月快照回補；預估 EPS = 當日指數 ÷ Forward PE。</li>',
+      NDX: '<li>本益比：<a href="https://worldperatio.com/index/nasdaq-100/" target="_blank" rel="noopener">worldperatio.com</a>（以 QQQ 成分股計算，1990 年起），EPS = 月底 Nasdaq-100 指數 ÷ 本益比。</li>' +
+        '<li>Forward PE：<a href="https://www.wsj.com/market-data/stocks/peyields" target="_blank" rel="noopener">WSJ P/Es &amp; Yields</a>（Birinyi Associates 未來 12 個月營業盈餘預估），2013 年起以 Wayback Machine 月快照回補。</li>'
+    }[st.idx] || '';
+    return '<details><summary>資料來源與計算方式</summary><ul>' + s + common + '<li>前瞻與近四季盈餘的口徑不同（美股前瞻為營業盈餘），成長率僅供參考。價格：Yahoo Finance。每個交易日自動更新。</li></ul></details>';
+  }
+
+  // ---------- 事件 ----------
+  root.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    var seg = b.parentNode;
+    if (seg.id === 's-idx') { st.idx = b.dataset.v; history.replaceState(null, '', '#' + st.idx); }
+    else if (seg.id === 's-win') st.win = +b.dataset.v;
+    else if (seg.dataset.view) st[seg.dataset.view] = b.dataset.v;
+    else return;
+    persist(); render();
+  });
+  var lastMob = isMobile();
+  window.addEventListener('resize', function () { if (isMobile() !== lastMob) { lastMob = isMobile(); render(); } });
+  if (window.matchMedia) window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', render);
+
+  fetch('data/market.json?t=' + Date.now()).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (d) {
+    DATA = d;
+    $('#upd').textContent = '更新 ' + d.updated;
+    render();
+  }).catch(function () {
+    $('#body').innerHTML = '<div class="msg">資料載入失敗，請稍後重新整理</div>';
+    $('#upd').textContent = '離線';
+  });
+})();
+</script>
+</body>
+</html>
