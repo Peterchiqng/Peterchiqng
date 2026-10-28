@@ -14,6 +14,7 @@
 
 只用標準函式庫，另需 xlrd 讀取證交所舊版 xls。
 """
+import bisect
 import datetime as dt
 import gzip
 import html
@@ -104,7 +105,8 @@ def months_between(a, b):
 
 # ---------------------------------------------------------------- Yahoo 價格
 def yahoo(sym, interval, rng):
-    u = f"https://query1.finance.yahoo.com/v8/finance/chart/{urllib.parse.quote(sym)}?range={rng}&interval={interval}"
+    q = f"period1=0&period2={int(time.time()) + 86400}" if rng == "max" else f"range={rng}"
+    u = f"https://query1.finance.yahoo.com/v8/finance/chart/{urllib.parse.quote(sym)}?{q}&interval={interval}"
     j = json.loads(get(u))["chart"]["result"][0]
     off = j["meta"].get("gmtoffset", 0)
     ts, cl = j.get("timestamp") or [], j["indicators"]["quote"][0]["close"]
@@ -135,13 +137,8 @@ def monthly_close(daily_or_monthly):
 
 def price_on(daily, date):
     """date 當日或之前最近的收盤"""
-    best = None
-    for d, c in daily:
-        if d <= date:
-            best = (d, c)
-        else:
-            break
-    return best
+    i = bisect.bisect_right([d for d, _ in daily], date)
+    return daily[i - 1] if i else None
 
 
 # ---------------------------------------------------------------- 台股：大盤本益比（證交所月報）
@@ -185,7 +182,7 @@ def taiex_trailing():
         time.sleep(0.3)
     save("twse_pe.json", cache)
     log("台股月報本益比", sum(v is not None for v in cache.values()), "個月，新抓", len(todo))
-    px = monthly_close(yahoo("^TWII", "1mo", "max"))
+    px = monthly_close(yahoo("^TWII", "1d", "max"))
     m, pe, eps, p = [], [], [], []
     for ym in sorted(cache):
         if cache[ym] and ym in px:
@@ -366,13 +363,22 @@ def multpl_table(path):
 def spx_trailing():
     pe = multpl_table("s-p-500-pe-ratio")
     eps = multpl_table("s-p-500-earnings")
+    daily = yahoo("^GSPC", "1d", "max")
+    keys = [d for d, _ in daily]
     m, P, E, PX = [], [], [], []
     last_eps = None
     for ym in sorted(set(pe) | set(eps)):
         if ym in eps:
             last_eps = eps[ym][1]
         if ym in pe and last_eps:
-            m.append(ym); P.append(pe[ym][1]); E.append(last_eps); PX.append(pe[ym][1] * last_eps)
+            d0, v = pe[ym]
+            i = bisect.bisect_right(keys, d0)
+            if i and (dt.date.fromisoformat(d0) - dt.date.fromisoformat(keys[i - 1])).days <= 5:
+                px = daily[i - 1][1]  # 有實際收盤價時：EPS = 價格 ÷ multpl 本益比
+                e = px / v
+            else:
+                px, e = v * last_eps, last_eps
+            m.append(ym); P.append(v); E.append(e); PX.append(px)
     log("S&P 500 multpl", len(m), "個月", m[0], "→", m[-1], "PE", P[-1], "EPS", E[-1])
     return {"m": m, "px": [r2(x) for x in PX], "pe": [r2(x) for x in P], "eps": [r2(x) for x in E],
             "asof": pe[m[-1]][0]}
@@ -384,7 +390,7 @@ def ndx_trailing():
     mm = re.search(r"detailPE_data\s*=\s*\[(.*?)\]\s*;?\s*\n", w, re.S)
     pts = re.findall(r"Date\.UTC\((\d+),\s*(\d+),\s*(\d+)\),\s*([\d.]+)", mm.group(1))
     pe = {f"{int(y):04d}-{int(m) + 1:02d}": float(v) for y, m, d, v in pts}
-    px = monthly_close(yahoo("^NDX", "1mo", "max"))
+    px = monthly_close(yahoo("^NDX", "1d", "max"))
     m, P, E, PX = [], [], [], []
     for ym in sorted(pe):
         if ym in px:
