@@ -1,0 +1,26 @@
+{
+ "get": {
+  "status": 200,
+  "final": "https://script.googleusercontent.com/macros/echo?user_conten",
+  "acao": "*",
+  "body": "{\"ok\":true,\"app\":\"order-tracker\",\"time\":\"2026-10-30T13:23:02.841Z\"}"
+ },
+ "ping": {
+  "status": 200,
+  "final": "https://script.googleusercontent.com/macros/echo?user_conten",
+  "acao": "*",
+  "body": "{\"ok\":true}"
+ },
+ "unknown_login": {
+  "status": 200,
+  "final": "https://script.googleusercontent.com/macros/echo?user_conten",
+  "acao": "*",
+  "body": "{\"ok\":false,\"error\":\"帳號或密碼錯誤\"}"
+ },
+ "bad_token": {
+  "status": 200,
+  "final": "https://script.googleusercontent.com/macros/echo?user_conten",
+  "acao": "*",
+  "body": "{\"ok\":false,\"error\":\"登入已過期，請重新登入\",\"auth\":false}"
+ }
+}
