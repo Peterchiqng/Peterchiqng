@@ -1,0 +1,97 @@
+/* 投資儀表板 · Just buy it 主題（與 Order Tracker 同一套色彩、字型、圓角、漸層）
+   以較高權重（body #id）覆寫各分頁原本的配色變數；圖表顏色會自動跟著變數走。 */
+:root{
+  --j-g-brand:linear-gradient(125deg,#236C9A 0%,#2A82B8 28%,#3B95C4 55%,#62B6E0 78%,#FFB27A 100%);
+  --j-g-orange:linear-gradient(135deg,#FFBE8A 0%,#FF9F55 55%,#F5852F 100%);
+  --j-g-blue:linear-gradient(90deg,#5FB4E2 0%,#3B95C4 55%,#2A82B8 100%);
+  --j-disp:'Fredoka','Nunito',system-ui,sans-serif;
+  --j-body:'Nunito',system-ui,-apple-system,'Segoe UI','Noto Sans TC','Microsoft JhengHei',sans-serif}
+@media (prefers-color-scheme: dark){:root{--j-g-brand:linear-gradient(125deg,#123B55 0%,#174C6C 30%,#1E5F86 58%,#2A7AA8 80%,#C9773D 100%)}}
+
+html,body{background:#F3F8FC}
+@media (prefers-color-scheme: dark){html,body{background:#0C1823}}
+
+/* ---------- 共用配色變數 ---------- */
+body #sd-root,body #mk{
+  --bg:#F3F8FC;--pn:#FFFFFF;--cd:#F7FBFE;--ln:#E1ECF4;--ln2:#C9DCEA;--tx:#16324A;--tx2:#36536B;--mu:#6A8399;--mu2:#9AAFC0;
+  --ac:#2A82B8;--acw:rgba(59,149,196,.12);--up:#E5484D;--dn:#12A06A;--warn:#F5852F;--grid:#EAF2F8;
+  --b0:#2A82B8;--b1:#5FB4E2;--b2:#9AAFC0;--b3:#FFB27A;--b4:#F5852F;--px:#16324A;
+  --mono:'Nunito',system-ui,sans-serif;
+  --sh:0 1px 2px rgba(22,50,74,.05),0 8px 24px rgba(22,50,74,.07);
+  font-family:var(--j-body);font-variant-numeric:tabular-nums;background:var(--bg);border-radius:20px;-webkit-font-smoothing:antialiased}
+@media (prefers-color-scheme: dark){body #sd-root,body #mk{
+  --bg:#0C1823;--pn:#122331;--cd:#16293A;--ln:#1F3547;--ln2:#2C4760;--tx:#E8F1F8;--tx2:#C2D4E2;--mu:#88A2B7;--mu2:#5F7A90;
+  --ac:#4FA9DA;--acw:rgba(79,169,218,.16);--up:#F26A6E;--dn:#3CC48A;--warn:#FFA866;--grid:#1A2E3F;
+  --b0:#4FA9DA;--b1:#8FCDEE;--b2:#5F7A90;--b3:#FFC08F;--b4:#FFA866;--px:#E8F1F8;
+  --sh:0 1px 2px rgba(0,0,0,.25),0 8px 24px rgba(0,0,0,.25)}}
+
+/* ---------- 導覽列 ---------- */
+body #nav{--bg:#FFFFFF;--pn:#F7FBFE;--ln:#E1ECF4;--tx:#16324A;--mu:#6A8399;--ac:#2A82B8;font-family:var(--j-body);
+  background:color-mix(in srgb,#FFFFFF 86%,transparent)}
+@media (prefers-color-scheme: dark){body #nav{--bg:#122331;--pn:#16293A;--ln:#1F3547;--tx:#E8F1F8;--mu:#88A2B7;--ac:#4FA9DA;background:color-mix(in srgb,#122331 86%,transparent)}}
+body #nav .brand{display:inline-flex;align-items:center;gap:9px;font-family:var(--j-disp);font-weight:600;font-size:18px;color:#3B95C4;letter-spacing:-.2px}
+body #nav .brand i{width:32px;height:32px;border-radius:50%;background:#fff;box-shadow:0 0 0 1px var(--ln),0 2px 6px rgba(22,50,74,.10);display:inline-flex;align-items:center;justify-content:center;flex:none}
+body #nav .brand i svg{width:20px;height:20px}
+body #nav .tabs{border-radius:999px;padding:4px;background:var(--pn)}
+body #nav .tabs a{border-radius:999px;font-weight:700;font-size:13.5px;padding:7px 18px}
+body #nav .tabs a.on{background:var(--j-g-blue);color:#fff;box-shadow:0 2px 8px rgba(42,130,184,.32)}
+
+/* ---------- 標題橫幅（漸層） ---------- */
+body #sd-root .sd-head,body #mk .hd{background:var(--j-g-brand);color:#fff;border-radius:22px;padding:22px 24px;position:relative;overflow:hidden;box-shadow:0 10px 30px rgba(42,130,184,.25);align-items:center}
+body #sd-root .sd-head::after,body #mk .hd::after{content:'';position:absolute;width:240px;height:240px;border-radius:50%;right:-60px;top:-140px;background:radial-gradient(circle,rgba(255,255,255,.22),rgba(255,255,255,0) 70%);pointer-events:none}
+body #sd-root .sd-head>*,body #mk .hd>*{position:relative;z-index:1}
+body #sd-root h1,body #mk h1{font-family:var(--j-disp);font-weight:600;font-size:27px;letter-spacing:-.3px;color:#fff}
+body #sd-root h1 small{color:rgba(255,255,255,.75)!important}
+body #sd-root .sd-sub,body #mk .sub{color:rgba(255,255,255,.88);font-weight:600;font-size:13px}
+body #sd-root .sd-badge,body #mk .badge{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.32);color:#fff;font-weight:700;font-family:var(--j-body)}
+body #sd-root .sd-badge.live{background:rgba(255,255,255,.22);color:#fff;border-color:rgba(255,255,255,.4)}
+body #sd-root .sd-badge.sample{background:rgba(255,178,122,.35);color:#fff;border-color:rgba(255,190,138,.6)}
+body #mk .hd a.badge{background:#fff!important;color:#2A82B8!important}
+
+/* ---------- 文字層級 ---------- */
+body #sd-root h2,body #mk h2{font-family:var(--j-disp);font-weight:600;font-size:17px}
+body #sd-root h2 small,body #mk h2 small{font-family:var(--j-body);font-weight:600;font-size:12px}
+body #sd-root .sd-title .nm,body #sd-root .sd-title .px{font-family:var(--j-disp);font-weight:600}
+body #sd-root .sd-title .cd{font-weight:700}
+body #mk .st b{font-weight:800}
+
+/* ---------- 卡片與面板 ---------- */
+body #sd-root .sd-panel,body #mk .pn{border-radius:20px;border:1px solid var(--ln);box-shadow:var(--sh);padding:18px 18px 14px}
+body #sd-root .sd-card,body #mk .card{border-radius:16px;border:1px solid var(--ln);box-shadow:var(--sh)}
+body #sd-root .sd-panel .sd-card{box-shadow:none}
+body #sd-root .sd-card .l,body #mk .card .l{font-weight:700;font-size:12px}
+body #sd-root .sd-card .v,body #mk .card .v{font-family:var(--j-disp);font-weight:600;font-size:21px}
+body #sd-root .sd-card .s,body #mk .card .s{font-weight:600}
+body #mk .no{background:var(--j-g-blue);color:#fff;border:0;border-radius:999px;padding:2px 9px;font-family:var(--j-body);font-weight:800}
+
+/* ---------- 按鈕、輸入、篩選 ---------- */
+body #sd-root input[type=text],body #sd-root input[type=password],body #sd-root select{border-radius:12px;border:1.5px solid var(--ln);background:var(--cd);font-weight:600}
+body #sd-root input:focus,body #sd-root select:focus{border-color:#3B95C4;box-shadow:0 0 0 4px var(--acw);background:var(--pn)}
+body #sd-root .sd-search>button,body #sd-root .fs-search button{background:var(--j-g-orange);color:#3A1E06;border-radius:999px;font-weight:800;box-shadow:0 4px 14px rgba(255,159,85,.40);padding:10px 22px}
+body #sd-root .sd-chip{border-radius:999px;border:1.5px solid var(--ln);font-weight:700;color:var(--tx2);background:var(--pn);padding:5px 13px}
+body #sd-root .sd-chip:hover{border-color:#3B95C4;color:var(--ac)}
+body #sd-root .fs-tabs button{border-radius:999px;font-weight:700;border-width:1.5px}
+body #sd-root .fs-tabs button.on{background:var(--j-g-blue);color:#fff;border-color:transparent}
+body #sd-root .sd-sugg{border-radius:14px;box-shadow:var(--sh)}
+body #sd-root .sd-sugg b{font-weight:800}
+body #mk .seg{border-radius:999px;padding:4px;box-shadow:var(--sh)}
+body #mk .seg button{border-radius:999px;font-weight:700}
+body #mk .seg button.on{background:var(--j-g-blue);color:#fff;box-shadow:0 2px 8px rgba(42,130,184,.30)}
+body #mk .bar .lbl{font-weight:700}
+
+/* ---------- 表格與其他 ---------- */
+body #sd-root th,body #mk th{font-weight:800}
+body #sd-root td{font-weight:600}
+body #sd-root .sd-status{font-weight:600}
+body #sd-root .sd-foot,body #mk details{font-weight:600}
+body #mk details summary{font-weight:700}
+
+@media (max-width:600px){
+  body #sd-root,body #mk{border-radius:0}
+  body #sd-root .sd-head,body #mk .hd{padding:18px 18px;border-radius:18px}
+  body #sd-root h1,body #mk h1{font-size:22px}
+  body #sd-root .sd-panel,body #mk .pn{padding:14px 10px 10px;border-radius:16px}
+  body #sd-root .sd-card .v,body #mk .card .v{font-size:18px}
+  body #nav .tabs a{padding:8px 6px}
+  body #nav .brand{display:none}
+}

@@ -89,10 +89,12 @@ body{padding:0 12px 12px}
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="portfolio/pf.css">
+<link rel="stylesheet" href="assets/jbi.css">
+<meta name="theme-color" content="#3B95C4">
 </head>
 <body>
 <nav id="nav"><div class="in">
-  <span class="brand">投資儀表板</span>
+  <span class="brand"><i><svg viewBox="0 0 24 24" fill="none" stroke="#FF9F55" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18"/><path d="M5 16l4-5 4 3 6-8"/><path d="M15 6h4v4"/></svg></i>投資儀表板</span>
   <div class="tabs" role="tablist">
     <a href="#stock" data-tab="stock" role="tab">個股分析</a>
     <a href="#market" data-tab="market" role="tab">大盤估值</a>
@@ -370,8 +372,8 @@ body{padding:0 12px 12px}
   var API = 'https://api.finmindtrade.com/api/v4/data';
   var UNIT = 1e8;                    // FinMind 金額單位(元) → 億元。若與CMoney數字相差1000倍，改成 1e5
   var LAG = { 1: 1, 2: 1, 3: 1, 4: 3 }; // 季報套用到河流圖的延遲月數（Q4年報較晚）
-  var BC = ['#22c55e', '#84cc16', '#eab308', '#f97316', '#ef4444', '#a855f7'];
-  var BF = ['rgba(34,197,94,.12)', 'rgba(132,204,22,.12)', 'rgba(234,179,8,.12)', 'rgba(249,115,22,.13)', 'rgba(239,68,68,.13)', 'rgba(168,85,247,.13)'];
+  var BC = ['#2A82B8', '#5FB4E2', '#8FCDEE', '#FFC08F', '#FF9F55', '#E5484D'];
+  var BF = ['rgba(42,130,184,.12)', 'rgba(95,180,226,.12)', 'rgba(143,205,238,.14)', 'rgba(255,192,143,.16)', 'rgba(255,159,85,.15)', 'rgba(229,72,77,.12)'];
 
   var BUILTIN = [
     ['2330', '台積電'], ['2317', '鴻海'], ['2454', '聯發科'], ['2308', '台達電'], ['2382', '廣達'], ['2303', '聯電'],
@@ -1103,7 +1105,7 @@ body{padding:0 12px 12px}
     readT();
     Chart.defaults.color = T.mu;
     Chart.defaults.borderColor = T.grid;
-    Chart.defaults.font.family = "'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif";
+    Chart.defaults.font.family = "Nunito,'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif";
   } else {
     status('圖表函式庫（Chart.js）載入失敗，請確認網站允許載入 cdnjs.cloudflare.com 的腳本。', 'err');
   }
@@ -1207,7 +1209,7 @@ body{padding:0 12px 12px}
       layout: { padding: { left: 2, right: mob ? 2 : 8, top: 4, bottom: 0 } },
       plugins: {
         legend: { position: 'top', align: 'end', labels: { color: T.mu, boxWidth: 10, boxHeight: 10, font: { size: mob ? 10 : 11 }, padding: mob ? 8 : 12, usePointStyle: true, pointStyle: 'rectRounded' } },
-        tooltip: { backgroundColor: T.pn, titleColor: T.tx, bodyColor: T.tx2, borderColor: T.ln, borderWidth: 1, padding: 10, bodyFont: { family: "'IBM Plex Mono',monospace", size: 11 }, titleFont: { size: 12 } }
+        tooltip: { backgroundColor: T.pn, titleColor: T.tx, bodyColor: T.tx2, borderColor: T.ln, borderWidth: 1, padding: 10, bodyFont: { family: "Nunito, system-ui, sans-serif", size: 11 }, titleFont: { size: 12 } }
       },
       scales: {
         x: { grid: { display: false }, border: { color: T.ln }, ticks: { color: T.mu, maxRotation: 0, autoSkip: true, maxTicksLimit: mob ? 5 : 9, font: { size: mob ? 10 : 11 } } },
