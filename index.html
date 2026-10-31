@@ -85,6 +85,10 @@ body{padding:0 12px 12px}
   #mk .bar .lbl{display:none}
 }
 </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="portfolio/pf.css">
 </head>
 <body>
 <nav id="nav"><div class="in">
@@ -92,6 +96,7 @@ body{padding:0 12px 12px}
   <div class="tabs" role="tablist">
     <a href="#stock" data-tab="stock" role="tab">個股分析</a>
     <a href="#market" data-tab="market" role="tab">大盤估值</a>
+    <a href="#portfolio" data-tab="portfolio" role="tab">持股</a>
   </div>
 </div></nav>
 
@@ -302,6 +307,8 @@ body{padding:0 12px 12px}
 
 </section>
 
+<section class="tab" id="tab-portfolio" data-tab="portfolio" hidden><div id="pf"></div></section>
+
 <section class="tab" id="tab-market" data-tab="market" hidden>
 <div id="mk">
   <div class="hd">
@@ -337,11 +344,11 @@ body{padding:0 12px 12px}
 /* 分頁切換：#stock / #market（#market/SPX 可直接開某個指數） */
 (function () {
   var tabs = document.querySelectorAll('#nav .tabs a'), secs = document.querySelectorAll('section.tab');
-  function current() { return /^#market/.test(location.hash) ? 'market' : 'stock'; }
+  function current() { return /^#market/.test(location.hash) ? 'market' : /^#portfolio/.test(location.hash) ? 'portfolio' : 'stock'; }
   window.__showTab = function (id) {
     secs.forEach(function (s) { s.hidden = s.dataset.tab !== id; });
     tabs.forEach(function (a) { var on = a.dataset.tab === id; a.classList.toggle('on', on); a.setAttribute('aria-selected', on); });
-    document.title = (id === 'market' ? '大盤估值' : '個股分析') + ' · 投資儀表板';
+    document.title = ({ market: '大盤估值', portfolio: '持股' }[id] || '個股分析') + ' · 投資儀表板';
     document.dispatchEvent(new CustomEvent('tabshow', { detail: id }));
   };
   tabs.forEach(function (a) {
@@ -1446,6 +1453,7 @@ body{padding:0 12px 12px}
   });
 })();
 </script>
-<script>__showTab(/^#market/.test(location.hash) ? 'market' : 'stock');</script>
+<script src="portfolio/pf.js"></script>
+<script>__showTab(/^#market/.test(location.hash) ? 'market' : /^#portfolio/.test(location.hash) ? 'portfolio' : 'stock');</script>
 </body>
 </html>
