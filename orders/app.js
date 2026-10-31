@@ -7,6 +7,19 @@
   var PAGE = document.body.dataset.page;
   var STEPS = ['Order placed', 'Shipped', 'Arrived in TW', 'Out for delivery', 'Delivered'];
   var $ = function (s) { return document.querySelector(s); };
+  var LINE_URL = CFG.LINE_URL || '';
+  var CART = '<svg viewBox="0 0 24 24" fill="none" stroke="#FF9F55" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 4h2.6l2.2 10.2a1.6 1.6 0 0 0 1.6 1.3h8.3a1.6 1.6 0 0 0 1.6-1.2L20.5 8H6.2"/><circle cx="9.5" cy="19.6" r="1.3" fill="#FF9F55"/><circle cx="17" cy="19.6" r="1.3" fill="#FF9F55"/><path d="M11 11.2h6.2M14.8 8.8l2.4 2.4-2.4 2.4"/></svg>';
+  var LINE_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3C6.5 3 2 6.6 2 11c0 3.9 3.5 7.2 8.3 7.9.3.1.8.2.9.5.1.3.1.7 0 1l-.1.9c0 .3-.2 1 .9.5s5.9-3.5 8.1-6C21.4 14.2 22 12.7 22 11c0-4.4-4.5-8-10-8z"/></svg>';
+  function logo() { return '<span class="logo"><span class="mk">' + CART + '</span><span class="wm">' + esc(CFG.BRAND || 'Just buy it') + '</span></span>'; }
+  function badge() {
+    return '<svg viewBox="0 0 100 100" width="78" height="78" aria-label="Just buy it"><text x="17" y="44" font-family="Fredoka,Nunito,sans-serif" font-weight="600" font-size="30" fill="#3B95C4">Just</text>' +
+      '<text x="14" y="72" font-family="Fredoka,Nunito,sans-serif" font-weight="600" font-size="30" fill="#3B95C4">buy</text><text x="68" y="86" font-family="Fredoka,Nunito,sans-serif" font-weight="600" font-size="22" fill="#3B95C4">it</text>' +
+      '<g transform="translate(68 27) scale(1.05)">' + CART.replace('<svg viewBox="0 0 24 24"', '<svg width="24" height="24" viewBox="0 0 24 24"') + '</g></svg>';
+  }
+  function contactHTML() {
+    if (LINE_URL) return '<a class="line" href="' + esc(LINE_URL) + '" target="_blank" rel="noopener">' + LINE_ICON + 'Message us on LINE</a>';
+    return CFG.CONTACT ? esc(CFG.CONTACT) : '';
+  }
 
   /* Payment statuses are entered in Chinese in the Google Sheet; show them in English */
   var PAY_EN = { '未付款': 'Unpaid', '已付訂金': 'Deposit paid', '已付清': 'Paid in full', '部分付款': 'Partially paid', '已退款': 'Refunded', '—': '—' };
@@ -87,13 +100,13 @@
   /* ---------- Shared layout ---------- */
   function header() {
     var a = auth();
-    var brand = esc(CFG.BRAND || 'Order Tracker');
-    $('#top').innerHTML = '<div class="in"><a class="brand" href="index.html"><i>✓</i><span>' + brand + '</span></a>' +
+    $('#top').innerHTML = '<div class="in' + (a ? ' signed' : '') + '"><a href="index.html" aria-label="Home">' + logo() + '</a>' +
       (a ? '<nav class="tabs"><a href="index.html"' + (PAGE === 'home' ? ' class="on"' : '') + '>Home</a><a href="status.html"' + (PAGE === 'status' ? ' class="on"' : '') + '>Order status</a></nav>' +
-        '<div class="who"><span class="nm">Hi, <b>' + esc(a.name) + '</b></span><button class="btn-ghost" id="logout">Sign out</button></div>' : '') + '</div>';
+        '<div class="who"><span class="nm"><b>' + esc(a.name) + '</b></span><button class="btn-ghost" id="logout">Sign out</button></div>' : '') + '</div>';
     var lo = $('#logout'); if (lo) lo.onclick = logout;
-    document.title = (PAGE === 'status' ? 'Order status' : 'Home') + ' · ' + (CFG.BRAND || 'Order Tracker');
-    if (CFG.CONTACT) $('#foot').textContent = 'Questions? Contact us: ' + CFG.CONTACT;
+    document.title = (PAGE === 'status' ? 'Order status' : 'Order tracking') + ' · ' + (CFG.BRAND || 'Just buy it');
+    $('#foot').innerHTML = '<div class="tag"><b>' + esc(CFG.SLOGAN || 'Order from any app, pick up from any store in Taiwan 🇹🇼') + '</b><span>' + esc(CFG.STORES || 'Shopee • Taobao • POYA & more') + '</span></div>' +
+      (contactHTML() ? '<div>Questions? ' + contactHTML() + '</div>' : '');
   }
   function demoNote() { return DEMO ? '<div class="demo">Demo mode: the Google Sheet backend is not connected yet (API_URL in config.js is empty), so the data below is sample data.</div>' : ''; }
   function fail(e) {
@@ -103,11 +116,17 @@
 
   /* ---------- Sign in ---------- */
   function loginView() {
-    $('#main').innerHTML = demoNote() + '<div class="login"><div class="pn"><h1>Track your orders</h1><p class="sub">Sign in to see payment and delivery status</p>' +
+    var stores = (CFG.STORES || 'Shopee • Taobao • POYA & more').split('•').map(function (s) { return s.trim(); }).filter(String);
+    $('#main').innerHTML = demoNote() + '<div class="auth">' +
+      '<section class="hero"><div class="badge">' + badge() + '</div>' +
+      '<h1>Order from any app,<br><em>pick up</em> anywhere in Taiwan</h1>' +
+      '<p>Track every order in one place — payment status, shipping progress and estimated arrival.</p>' +
+      '<div class="chips">' + stores.map(function (s) { return '<span>' + esc(s) + '</span>'; }).join('') + '</div></section>' +
+      '<section class="signin"><h2>Track your orders</h2><p class="sub">Sign in with the account we sent you</p>' +
       '<form id="lf" autocomplete="on"><label for="acc">Account</label><input id="acc" name="username" autocomplete="username" autocapitalize="off" spellcheck="false" required>' +
       '<label for="pw">Password</label><input id="pw" name="password" type="password" autocomplete="current-password" required>' +
       '<button class="btn" id="lb" type="submit">Sign in</button><div class="err" id="le"></div></form>' +
-      '<div class="hint">Forgot your account or password? Contact us to reset it' + (CFG.CONTACT ? ': ' + esc(CFG.CONTACT) : '.') + '</div></div></div>';
+      '<div class="hint">Forgot your account or password?' + (contactHTML() ? '<br>' + contactHTML() : ' Contact us to reset it.') + '</div></section></div>';
     $('#lf').onsubmit = function (ev) {
       ev.preventDefault();
       var b = $('#lb'); b.disabled = true; b.textContent = 'Signing in…'; $('#le').textContent = '';
@@ -132,8 +151,7 @@
   }
   function renderHome(d) {
     var s = d.summary, pctPaid = s.total ? Math.min(100, s.paid / s.total * 100) : 0;
-    var STEP_COL = ['mu', 'ind', 'warn', 'ac', 'dn'];
-    var h = demoNote() + '<h1>' + esc(d.user.name) + '’s orders</h1><p class="sub">Last updated ' + esc(d.serverTime) + '</p>';
+    var h = demoNote() + '<h1>Hi, ' + esc(d.user.name) + ' 👋</h1><p class="sub">Last updated ' + esc(d.serverTime) + '</p>';
     h += '<section class="pn"><div class="ph"><h2>Payment summary<small>Refunded orders excluded</small></h2>' + payBadge(s.payStatus) + '</div>' +
       '<div class="cards">' +
       '<div class="card"><div class="l">Order total</div><div class="v">' + money(s.total) + '</div><div class="s">' + plural(s.orders, 'order') + '</div></div>' +
@@ -142,7 +160,7 @@
       '<div class="card"><div class="l">In transit</div><div class="v">' + s.inTransit + '</div><div class="s">' + (s.nextEta ? 'Next arrival ' + esc(s.nextEta) : 'No orders in transit') + '</div></div>' +
       '</div><div class="paybar"><i style="width:' + pctPaid + '%"></i></div><div class="paylegend"><span>Paid ' + money(s.paid) + '</span><span>Total ' + money(s.total) + '</span></div></section>';
     h += '<section class="pn"><div class="ph"><h2>Delivery overview</h2><a class="more" href="status.html">Order status →</a></div><div class="pipe">' +
-      STEPS.map(function (k, i) { var n = (s.counts && s.counts[k]) || 0; return '<div class="' + (n ? '' : 'zero') + '"><b style="' + (n ? 'color:var(--' + STEP_COL[i] + ')' : '') + '">' + n + '</b><span>' + k + '</span></div>'; }).join('') + '</div></section>';
+      STEPS.map(function (k, i) { var n = (s.counts && s.counts[k]) || 0; return '<div class="' + (n ? 'has' : 'zero') + (i === 4 ? ' last' : '') + '"><b>' + n + '</b><span>' + k + '</span></div>'; }).join('') + '</div></section>';
     var rows = d.orders.slice(0, 6);
     h += '<section class="pn"><div class="ph"><h2>Recent orders</h2>' + (d.orders.length > rows.length ? '<a class="more" href="status.html">View all ' + d.orders.length + ' →</a>' : '') + '</div>' +
       (rows.length ? '<table class="list"><thead><tr><th>Order no.</th><th>Item</th><th class="r">Amount</th><th>Payment</th><th>Delivery</th><th>Est. arrival</th></tr></thead><tbody>' +
@@ -179,8 +197,8 @@
     h += list.length ? list.map(function (o) {
       var refunded = o.payStatus === REFUND;
       var steps = STEPS.map(function (k, i) {
-        var cls = refunded ? '' : i < o.step || (i === o.step && o.step === 4) ? 'done' : i === o.step ? 'cur' : '';
-        return '<div class="step ' + cls + '"><span class="dot">' + (cls === 'done' ? '✓' : '') + '</span>' + k + '</div>';
+        var cls = refunded ? '' : (o.step === 4 && i === 4) ? 'done fin' : i < o.step ? 'done' : i === o.step ? 'cur' : '';
+        return '<div class="step ' + cls + '"><span class="dot">' + (cls.indexOf('done') === 0 ? '✓' : i === o.step && !refunded ? i + 1 : '') + '</span>' + k + '</div>';
       }).join('');
       var et = etaText(o);
       return '<article class="pn order' + (o.id === target ? ' hl' : '') + '" id="' + esc(o.id) + '">' +
