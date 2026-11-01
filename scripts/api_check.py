@@ -9,4 +9,4 @@ def go(body=None):
     except Exception as e:
         return {"error": repr(e)[:300]}
 out = {"get": go(), "ping": go({"action": "ping"}), "wrong_pw": go({"action": "login", "password": "definitely-wrong"}), "bad_token": go({"action": "get", "token": "abc.def"})}
-open("api_check.json", "w").write(json.dumps(out, ensure_ascii=False, indent=1))
+import time; out["checked_at"] = time.strftime("%H:%M:%S"); open("api_check.json", "w").write(json.dumps(out, ensure_ascii=False, indent=1))
