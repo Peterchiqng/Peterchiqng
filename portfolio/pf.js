@@ -13,6 +13,7 @@
   var PALETTE = ['#2A82B8', '#FF9F55', '#5FB4E2', '#F5852F', '#8FCDEE', '#FFC08F', '#236C9A', '#FFD9B8', '#7FA6C2', '#B8D9EC', '#E56B2A', '#4B6B85'];
   var ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg>';
   var ICON_DEL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>';
+  var CLOUD = '<svg viewBox="0 0 24 24" fill="none" stroke="#3A1E06" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18a4.5 4.5 0 0 1-.6-9 6 6 0 0 1 11.5 1.6A4 4 0 0 1 17.5 18z"/><path d="M12 15v-5M9.8 12.2 12 10l2.2 2.2"/></svg>';
   var CART = '<svg viewBox="0 0 24 24" fill="none" stroke="#3A1E06" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4h2.6l2.2 10.2a1.6 1.6 0 0 0 1.6 1.3h8.3a1.6 1.6 0 0 0 1.6-1.2L20.5 8H6.2"/><circle cx="9.5" cy="19.6" r="1.3" fill="#3A1E06"/><circle cx="17" cy="19.6" r="1.3" fill="#3A1E06"/><path d="M11 11.2h6.2M14.8 8.8l2.4 2.4-2.4 2.4"/></svg>';
 
   /* ---------------- 狀態 ---------------- */
@@ -25,7 +26,84 @@
   var LIST = null;
   var ui = { mkt: 'all', type: 'all', q: '', sort: { k: 'mv', d: -1 }, alloc: 'stock', visible: false, loading: false };
   var charts = {};
-  function persist() { save(KEY, S); }
+  function persist() { save(KEY, S); schedulePush(); }
+
+  /* ---------------- 雲端同步（Google Sheet ＋ Apps Script） ---------------- */
+  var SYNC_API = ((window.PF_CONFIG || {}).API_URL || '').trim();
+  var SY = load('pf-sync-v1', null) || {};
+  var sync = { state: SYNC_API ? (SY.token && SY.exp > Date.now() ? 'idle' : 'login') : 'off', msg: '', pulled: 0, skip: false };
+  function syncOn() { return SYNC_API && sync.state !== 'off' && sync.state !== 'login' && !sync.skip; }
+  function api(body) {
+    var timer, to = new Promise(function (_, rej) { timer = setTimeout(function () { rej(new Error('連線逾時')); }, 30000); });
+    var req = fetch(SYNC_API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) }).then(function (r) { return r.json(); });
+    return Promise.race([req, to]).then(function (j) { clearTimeout(timer); return j; }, function (e) { clearTimeout(timer); throw e; });
+  }
+  function authLost(r) {
+    if (r && r.auth === false) { SY = {}; save('pf-sync-v1', SY); sync.state = 'login'; sync.msg = r.error || ''; render(); return true; }
+    return false;
+  }
+  function applyRemote(r) {
+    S.holdings = (r.holdings || []).map(function (h) { return Object.assign({ id: h.id || uid() }, h); });
+    S.settings = Object.assign({ conc: 25, tp: 20, sl: -10 }, r.settings || {});
+    SY.rev = r.rev; SY.at = r.serverTime || ''; save('pf-sync-v1', SY); save(KEY, S);
+  }
+  function pull(silent) {
+    if (!syncOn()) return Promise.resolve();
+    sync.state = 'busy'; if (!silent) render();
+    return api({ action: 'get', token: SY.token }).then(function (r) {
+      if (authLost(r)) return;
+      if (!r.ok) throw new Error(r.error || '讀取失敗');
+      applyRemote(r); sync.state = 'ok'; sync.pulled = Date.now();
+    }).catch(function (e) { sync.state = 'err'; sync.msg = e.message; }).then(function () { render(); refresh(); });
+  }
+  var pushT = null;
+  function schedulePush() { if (!syncOn()) return; clearTimeout(pushT); sync.state = 'busy'; pushT = setTimeout(push, 700); }
+  function push(force) {
+    if (!syncOn()) return Promise.resolve();
+    return api({ action: 'save', token: SY.token, rev: SY.rev, force: !!force, holdings: S.holdings, settings: S.settings }).then(function (r) {
+      if (authLost(r)) return;
+      if (r.conflict) { applyRemote(r); sync.state = 'ok'; toast('另一台裝置剛更新過，已載入雲端最新資料，請再操作一次'); render(); refresh(); return; }
+      if (!r.ok) throw new Error(r.error || '儲存失敗');
+      SY.rev = r.rev; save('pf-sync-v1', SY); sync.state = 'ok'; sync.pulled = Date.now(); updateSub();
+    }).catch(function (e) { sync.state = 'err'; sync.msg = e.message; updateSub(); });
+  }
+  function connect(pw) {
+    return api({ action: 'login', password: pw }).then(function (r) {
+      if (!r.ok) throw new Error(r.error || '連線失敗');
+      SY = { token: r.token, exp: r.exp }; save('pf-sync-v1', SY);
+      return api({ action: 'get', token: SY.token });
+    }).then(function (r) {
+      if (!r.ok) throw new Error(r.error || '讀取失敗');
+      var local = S.holdings.length, remote = (r.holdings || []).length;
+      sync.state = 'ok'; sync.skip = false;
+      if (local && !remote) { SY.rev = r.rev; save('pf-sync-v1', SY); toast('已連接雲端，正在上傳這台裝置的 ' + local + ' 檔持股'); return push(true).then(function () { render(); refresh(); }); }
+      if (local && remote && !sameSet(S.holdings, r.holdings)) { ui.choice = r; render(); return; }
+      applyRemote(r); toast('已連接雲端同步'); render(); refresh();
+    });
+  }
+  function sameSet(a, b) {
+    var k = function (h) { return [h.market, h.code, +h.shares, +h.cost].join('|'); };
+    return a.map(k).sort().join(',') === b.map(k).sort().join(',');
+  }
+  function syncLabel() {
+    if (!SYNC_API) return '資料存在這個瀏覽器';
+    if (sync.skip || sync.state === 'login') return '<button class="btn-ghost" data-act="sync-login">☁️ 連接雲端同步</button>';
+    if (sync.state === 'busy') return '☁️ 同步中…';
+    if (sync.state === 'err') return '<span class="up">⚠ 同步失敗（已存本機）</span> <button class="btn-ghost" data-act="sync-retry">重試</button>';
+    return '☁️ 已與雲端同步';
+  }
+  function updateSub() { var el = $('#pf-sync'); if (el) el.innerHTML = syncLabel(); }
+  function loginView() {
+    return '<div class="empty sync"><div class="ic">' + CLOUD + '</div><h2>連接雲端同步</h2><p>輸入你在 Google 試算表設定的同步密碼，<br>手機與電腦就會讀寫同一份持股資料。</p>' +
+      '<form id="pf-lf" class="sync-form"><input id="pf-lpw" type="password" autocomplete="current-password" placeholder="同步密碼" required><button class="btn btn-pri" type="submit" id="pf-lbtn">連接</button></form>' +
+      '<div class="err" id="pf-lerr">' + esc(sync.msg || '') + '</div>' +
+      '<button class="btn-ghost" data-act="sync-skip">先不連接，只用這台裝置的資料</button></div>';
+  }
+  function choiceView(r) {
+    return '<div class="empty sync"><div class="ic">' + CLOUD + '</div><h2>要使用哪一份持股？</h2><p>雲端已有 <b>' + r.holdings.length + '</b> 檔持股，這台裝置有 <b>' + S.holdings.length + '</b> 檔，兩者不同。</p>' +
+      '<div class="pf-actions"><button class="btn btn-blue" data-act="use-cloud">使用雲端資料（' + r.holdings.length + ' 檔）</button><button class="btn btn-sec" data-act="use-local">用這台裝置的資料覆蓋雲端</button></div></div>';
+  }
+
   function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 
   /* ---------------- 工具 ---------------- */
@@ -173,15 +251,17 @@
     if (!$('#pf-body')) shell();
     var body = $('#pf-body');
     destroyCharts();
+    if (SYNC_API && sync.state === 'login' && !sync.skip) { $('#pf-sub').innerHTML = '持股可在手機與電腦間同步'; body.innerHTML = loginView(); return; }
+    if (ui.choice) { $('#pf-sub').innerHTML = '連接雲端同步'; body.innerHTML = choiceView(ui.choice); return; }
     if (!S.holdings.length) {
-      $('#pf-sub').textContent = '資料只存在這個瀏覽器，可隨時匯出備份';
+      $('#pf-sub').innerHTML = (SYNC_API ? '<span id="pf-sync">' + syncLabel() + '</span>' : '資料只存在這個瀏覽器，可隨時匯出備份');
       body.innerHTML = '<div class="empty"><div class="ic">' + CART + '</div><h2>還沒有持股</h2><p>手動新增你的第一筆持股，或匯入券商匯出的 CSV。<br>報價會自動從 FinMind 更新（台股、美股皆可）。</p>' +
         '<div class="pf-actions"><button class="btn btn-pri" data-act="add">＋ 新增持股</button><button class="btn btn-blue" data-act="import">⬆ 匯入 CSV</button><button class="btn btn-sec" data-act="sample">載入範例資料</button></div></div>';
       return;
     }
     var C = compute(), T = C.tot;
     var rows = filtered(C.rows);
-    $('#pf-sub').innerHTML = (ui.loading ? '更新報價中…' : '報價日期 ' + esc(T.date || '—')) + ' · ' + C.rows.length + ' 檔 · 資料存在這個瀏覽器 <button class="btn-ghost" data-act="refresh" title="重新抓取報價">↻ 更新</button>';
+    $('#pf-sub').innerHTML = (ui.loading ? '更新報價中…' : '報價日期 ' + esc(T.date || '—')) + ' · ' + C.rows.length + ' 檔 · <span id="pf-sync">' + syncLabel() + '</span> <button class="btn-ghost" data-act="refresh" title="重新抓取報價與雲端資料">↻ 更新</button>';
     var h = '<section class="hero"><div class="fx">USD/TWD ' + n2(C.fx, 2) + (FX && FX.date ? '<br>' + esc(FX.date) : '') + '</div>' +
       '<div class="l">總市值（新台幣）</div><div class="big num">' + money(T.mv) + '</div>' +
       '<span class="chg">今日 ' + smoney(T.day) + '（' + pct(T.dayPct) + '）</span>' +
@@ -308,7 +388,7 @@
       '<div><label for="pf-stp">停利線（報酬率 %）</label><input id="pf-stp" type="number" step="1"></div>' +
       '<div><label for="pf-ssl">停損線（報酬率 %）</label><input id="pf-ssl" type="number" step="1" max="0"></div>' +
       '<div class="full"><div class="hint">跌破 20 週均線的提醒會自動計算，不需設定。</div></div>' +
-      '<div class="full"><button type="button" class="btn btn-sec btn-sm" id="pf-clear" style="color:var(--up)">清除所有持股資料</button></div></div></div>' +
+      '<div class="full" style="display:flex;gap:8px;flex-wrap:wrap">' + (SYNC_API ? '<button type="button" class="btn btn-sec btn-sm" data-act="sync-logout">☁️ 這台裝置停止同步</button>' : '') + '<button type="button" class="btn btn-sec btn-sm" id="pf-clear" style="color:var(--up)">清除所有持股資料</button></div></div></div>' +
       '<div class="df"><button type="button" class="btn btn-sec" data-close>取消</button><button type="submit" class="btn btn-pri">儲存</button></div></form></dialog>';
   }
   function open(id) { var d = $(id); if (d.showModal) d.showModal(); else d.setAttribute('open', ''); }
@@ -519,7 +599,13 @@
     else if (act === 'export') exportCSV();
     else if (act === 'settings') { $('#pf-sconc').value = S.settings.conc; $('#pf-stp').value = S.settings.tp; $('#pf-ssl').value = S.settings.sl; open('#pf-dlg-s'); }
     else if (act === 'sample') sample();
-    else if (act === 'refresh') refresh(true);
+    else if (act === 'refresh') { if (syncOn()) pull(); refresh(true); }
+    else if (act === 'sync-login') { sync.skip = false; sync.state = 'login'; sync.msg = ''; render(); }
+    else if (act === 'sync-skip') { sync.skip = true; render(); refresh(); }
+    else if (act === 'sync-retry') push();
+    else if (act === 'use-cloud') { applyRemote(ui.choice); ui.choice = null; toast('已載入雲端資料'); render(); refresh(); }
+    else if (act === 'use-local') { if (confirm('確定用這台裝置的 ' + S.holdings.length + ' 檔持股覆蓋雲端的 ' + ui.choice.holdings.length + ' 檔？')) { SY.rev = ui.choice.rev; ui.choice = null; push(true).then(function () { toast('已上傳到雲端'); render(); refresh(); }); } }
+    else if (act === 'sync-logout') { if (confirm('這台裝置要停止雲端同步嗎？（雲端資料不會被刪除）')) { SY = {}; save('pf-sync-v1', SY); sync.state = 'login'; sync.skip = true; close($('#pf-dlg-s')); render(); } }
     else if (act === 'alerts') { ui.allAlerts = !ui.allAlerts; render(); }
   });
   root.addEventListener('click', function (e) {
@@ -536,6 +622,11 @@
   });
   root.addEventListener('submit', function (e) {
     if (e.target.id === 'pf-fh') saveForm(e);
+    if (e.target.id === 'pf-lf') {
+      e.preventDefault();
+      var b = $('#pf-lbtn'); b.disabled = true; b.textContent = '連接中…'; $('#pf-lerr').textContent = '';
+      connect($('#pf-lpw').value).catch(function (er) { sync.state = 'login'; var el = $('#pf-lerr'); if (el) el.textContent = er.message; var bb = $('#pf-lbtn'); if (bb) { bb.disabled = false; bb.textContent = '連接'; } });
+    }
     if (e.target.id === 'pf-fs') {
       e.preventDefault();
       S.settings = { conc: +$('#pf-sconc').value || 25, tp: +$('#pf-stp').value || 20, sl: -Math.abs(+$('#pf-ssl').value || 10) };
@@ -552,7 +643,10 @@
 
   document.addEventListener('tabshow', function (e) {
     ui.visible = e.detail === 'portfolio';
-    if (ui.visible) { render(); refresh(); }
+    if (ui.visible) { render(); if (syncOn() && Date.now() - sync.pulled > 30000) pull(true); else refresh(); }
+  });
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && ui.visible && syncOn() && Date.now() - sync.pulled > 30000) pull(true);
   });
   var lastMob = window.innerWidth <= 600;
   window.addEventListener('resize', function () { var m = window.innerWidth <= 600; if (m !== lastMob) { lastMob = m; render(); } });
