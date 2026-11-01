@@ -1,18 +1,27 @@
 {
  "get": {
   "status": 200,
-  "final": "https://accounts.google.com/v3/signin/identifier?continue=ht",
-  "acao": null,
-  "body": "<!doctype html><html lang=\"en-US\" dir=\"ltr\"><head><base href=\"https://accounts.google.com/v3/signin/\"><link rel=\"preconnect\" href=\"//www.gstatic.com\"><meta name=\"referrer\" content=\"origin\"><style data-href=\"https://www.gstatic.com/_/mss/boq-identity/_/ss/k=boq-identity.AccountsSignInUi.FCLBobC_4m4.L"
+  "final": "https://script.googleusercontent.com/macros/echo?user_conten",
+  "acao": "*",
+  "body": "{\"ok\":true,\"app\":\"portfolio-sync\",\"configured\":true}"
  },
  "ping": {
-  "error": "<HTTPError 401: 'Unauthorized'>"
+  "status": 200,
+  "final": "https://script.googleusercontent.com/macros/echo?user_conten",
+  "acao": "*",
+  "body": "{\"ok\":true,\"configured\":true}"
  },
  "wrong_pw": {
-  "error": "<HTTPError 401: 'Unauthorized'>"
+  "status": 200,
+  "final": "https://script.googleusercontent.com/macros/echo?user_conten",
+  "acao": "*",
+  "body": "{\"ok\":false,\"error\":\"同步密碼錯誤\"}"
  },
  "bad_token": {
-  "error": "<HTTPError 401: 'Unauthorized'>"
+  "status": 200,
+  "final": "https://script.googleusercontent.com/macros/echo?user_conten",
+  "acao": "*",
+  "body": "{\"ok\":false,\"auth\":false,\"error\":\"同步已過期，請重新輸入同步密碼\"}"
  },
- "checked_at": "09:29:30"
+ "checked_at": "09:31:23"
 }
