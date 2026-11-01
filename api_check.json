@@ -1,26 +1,17 @@
 {
  "get": {
   "status": 200,
-  "final": "https://script.googleusercontent.com/macros/echo?user_conten",
-  "acao": "*",
-  "body": "{\"ok\":true,\"app\":\"order-tracker\",\"time\":\"2026-10-30T13:23:02.841Z\"}"
+  "final": "https://accounts.google.com/v3/signin/identifier?continue=ht",
+  "acao": null,
+  "body": "<!doctype html><html lang=\"en-US\" dir=\"ltr\"><head><base href=\"https://accounts.google.com/v3/signin/\"><link rel=\"preconnect\" href=\"//www.gstatic.com\"><meta name=\"referrer\" content=\"origin\"><style data-href=\"https://www.gstatic.com/_/mss/boq-identity/_/ss/k=boq-identity.AccountsSignInUi.FCLBobC_4m4.L"
  },
  "ping": {
-  "status": 200,
-  "final": "https://script.googleusercontent.com/macros/echo?user_conten",
-  "acao": "*",
-  "body": "{\"ok\":true}"
+  "error": "<HTTPError 401: 'Unauthorized'>"
  },
- "unknown_login": {
-  "status": 200,
-  "final": "https://script.googleusercontent.com/macros/echo?user_conten",
-  "acao": "*",
-  "body": "{\"ok\":false,\"error\":\"帳號或密碼錯誤\"}"
+ "wrong_pw": {
+  "error": "<HTTPError 401: 'Unauthorized'>"
  },
  "bad_token": {
-  "status": 200,
-  "final": "https://script.googleusercontent.com/macros/echo?user_conten",
-  "acao": "*",
-  "body": "{\"ok\":false,\"error\":\"登入已過期，請重新登入\",\"auth\":false}"
+  "error": "<HTTPError 401: 'Unauthorized'>"
  }
 }
