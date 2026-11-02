@@ -1,0 +1,34 @@
+name: 個股備援資料更新
+
+on:
+  schedule:
+    - cron: "40 7 * * 1-5"   # 台灣時間週一至週五 15:40（台股收盤後）
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: data-commit
+  cancel-in-progress: false
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 抓取個股資料
+        run: python scripts/stock_crawl.py
+      - name: 提交資料
+        run: |
+          git add stock/data
+          if git diff --cached --quiet; then echo "資料沒有變動"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898332+github-actions[bot]@users.noreply.github.com"
+          git commit -m "更新個股備援資料"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push

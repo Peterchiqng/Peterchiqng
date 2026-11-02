@@ -468,7 +468,7 @@ body{padding:0 12px 12px}
       function (e) {
         clearTimeout(timer);
         var msg = e && e.message ? e.message : String(e);
-        throw (/Failed to fetch|NetworkError|Load failed/i.test(msg) ? new Error('無法連線到資料來源（可能被跨網域限制擋下）') : e);
+        throw (/Failed to fetch|NetworkError|Load failed/i.test(msg) ? new Error('無法連線到 FinMind（可能已達每小時查詢上限或網路封鎖）') : e);
       }
     );
   }
@@ -1066,7 +1066,7 @@ body{padding:0 12px 12px}
       } else {
         var deployed = /github\.io$|pages\.dev$|^localhost$|^127\.0\.0\.1$/.test(location.hostname);
         status(deployed
-          ? '找不到 ' + s.id + ' 的資料檔 data/' + s.id + '.json。請確認代號在 tickers.json 內，且 GitHub Actions 已成功執行（到 Actions 分頁看紀錄）。即時來源訊息：' + e.message
+          ? '暫時無法從 FinMind 取得 ' + s.id + ' 的即時資料。常見原因：同一網路每小時的免費查詢次數已用完，或目前的網路／瀏覽器外掛擋住了 api.finmindtrade.com。請稍後再試、換個網路，或在下方「進階」填入免費的 FinMind token。常用股票可加入 stock/tickers.json，每天會自動備份，不受這個限制。'
           : '目前是預覽環境：這裡讀不到 data/ 資料夾，也不能連外部網站，只有 2330 有示範資料。請改用部署後的網址（…github.io/…）查詢 ' + s.id + '。', 'err');
       }
     });
